@@ -18,7 +18,6 @@
 data "aws_route53_zone" "selected" {
   zone_id      = var.dns_hosted_zone_id
   vpc_id       = var.vpc_id
-  #private_zone = true
 }
 
 # Locals block for DNS management.
