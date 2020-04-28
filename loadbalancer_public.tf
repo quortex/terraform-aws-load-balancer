@@ -119,7 +119,7 @@ resource "aws_lb_listener" "quortex_public_tls" {
   port              = "443"
   protocol          = "HTTPS"
   ssl_policy        = "ELBSecurityPolicy-2016-08" # this is the default policy (allows TLSv1 TLSv1.1 TLSv1.2)
-  certificate_arn   = var.load_balancer_certificate_arn
+  certificate_arn   = aws_acm_certificate.cert.arn
 
   default_action {
     type             = "forward"
