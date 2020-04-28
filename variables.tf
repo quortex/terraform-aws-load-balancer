@@ -54,11 +54,6 @@ variable "load_balancer_private_app_backend_ports" {
   description = "The port number on which backend instances are listening"
 }
 
-variable "load_balancer_certificate_arn" {
-  type        = string
-  description = "The ARN identifier of the certificate, from the AWS Certificate Manager service. The dns name defined in the certificate must match the DNS records created in Route53 (variables dns_records_private, dns_records_public)."
-}
-
 variable "load_balancer_private_whitelisted_ips" {
   type        = list(string)
   description = "A list of IP ranges to whitelist for private access."
@@ -85,6 +80,11 @@ variable "dns_records_public" {
   type        = map(string)
   description = "A map with dns records to add in dns_managed_zone for public endpoints set as value. Full domain names will be exported in a map for the given key."
   default     = {}
+}
+
+variable "ssl_certificate_subdomain" {
+  type        = string
+  description = "The subdomain name that will be written in the TLS certificate. Can include a wildcard. The hosted zone name will be appended to form the complete domain name."
 }
 
 variable "resource_labels" {
