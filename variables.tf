@@ -31,7 +31,7 @@ variable "vpc_id" {
 
 variable "subnet_ids" {
   type        = list(string)
-  description = "The IDs of the subnets"
+  description = "The IDs of the subnets (worker node subnets)"
 }
 
 variable "subnet_cidr_blocks" {
