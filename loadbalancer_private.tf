@@ -58,7 +58,7 @@ resource "aws_security_group" "quortex_private" {
   }
 
   tags = merge({
-      Name = var.name
+    Name = var.name
     },
     var.resource_labels
   )
@@ -69,14 +69,14 @@ resource "aws_lb" "quortex_private" {
   # #name               = "${var.name}-lb-pri"
   # name_prefix        = var.name
   # TODO: name should contain the cluster name, but it is limited to 32 characters
-  
+
   internal           = false
   load_balancer_type = "application"
   security_groups    = ["${aws_security_group.quortex_private.id}"]
   subnets            = var.subnet_ids
 
   tags = merge({
-      Name = var.name
+    Name = var.name
     },
     var.resource_labels
   )
@@ -88,18 +88,18 @@ resource "aws_lb_target_group" "quortex_private" {
   # this group id in an autoscaling group.
 
   # No target group will be created (yet) if the no port is defined
-  count       = length(var.load_balancer_private_app_backend_ports) > 0 ? 1 : 0
+  count = length(var.load_balancer_private_app_backend_ports) > 0 ? 1 : 0
 
   #name        = "${var.name}-target-group-private"
   # TODO: name should contain the cluster name, but it is limited to 32 characters
-  vpc_id      = var.vpc_id
-  
+  vpc_id = var.vpc_id
+
   target_type = "instance"
   protocol    = "HTTP"
   port        = var.load_balancer_private_app_backend_ports[0]
 
   tags = merge({
-      Name = var.name
+    Name = var.name
     },
     var.resource_labels
   )
@@ -111,9 +111,9 @@ resource "aws_lb_target_group" "quortex_private" {
 resource "aws_lb_listener" "quortex_private_tls" {
   # This listener terminates the TLS and forwards traffic in simple HTTP to the target
   # Configured with the certificate created in the ACM service
-  
+
   # No listener will be created (yet) if the no port is defined
-  count             = length(var.load_balancer_private_app_backend_ports) > 0 ? 1 : 0
+  count = length(var.load_balancer_private_app_backend_ports) > 0 ? 1 : 0
 
   load_balancer_arn = aws_lb.quortex_private.arn
   port              = "443"
@@ -132,7 +132,7 @@ resource "aws_lb_listener" "quortex_private_http" {
   # This listener forwards traffic as-is to the target
 
   # No listener will be created (yet) if the no port is defined
-  count             = length(var.load_balancer_private_app_backend_ports) > 0 ? 1 : 0
+  count = length(var.load_balancer_private_app_backend_ports) > 0 ? 1 : 0
 
   load_balancer_arn = aws_lb.quortex_private.arn
   port              = "80"

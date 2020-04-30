@@ -15,7 +15,7 @@
 */
 
 locals {
-  autoscaling_attachments_public_alb = setproduct(var.load_balancer_autoscaling_group_names, aws_lb_target_group.quortex_public[*].arn)
+  autoscaling_attachments_public_alb  = setproduct(var.load_balancer_autoscaling_group_names, aws_lb_target_group.quortex_public[*].arn)
   autoscaling_attachments_private_alb = setproduct(var.load_balancer_autoscaling_group_names, aws_lb_target_group.quortex_private[*].arn)
 }
 

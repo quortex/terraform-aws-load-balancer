@@ -16,13 +16,13 @@
 
 
 data "aws_route53_zone" "selected" {
-  zone_id      = var.dns_hosted_zone_id
-  vpc_id       = var.vpc_id
+  zone_id = var.dns_hosted_zone_id
+  vpc_id  = var.vpc_id
 }
 
 # Locals block for DNS management.
 locals {
-  public_domains = { for k, v in aws_route53_record.quortex_public : k => v.fqdn }
+  public_domains  = { for k, v in aws_route53_record.quortex_public : k => v.fqdn }
   private_domains = { for k, v in aws_route53_record.quortex_private : k => v.fqdn }
   all_domains     = concat(values(local.private_domains), values(local.public_domains))
 }
