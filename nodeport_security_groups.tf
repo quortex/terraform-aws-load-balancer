@@ -15,7 +15,7 @@
 */
 
 
-resource "aws_security_group_rule" "quortex-ingress-public" {
+resource "aws_security_group_rule" "quortex_ingress_public" {
   count = length(var.load_balancer_public_app_backend_ports)
 
   description       = "Allow access to the public ingress service (nodeport ${var.load_balancer_public_app_backend_ports[count.index]}) from the Load Balancer"
@@ -29,7 +29,7 @@ resource "aws_security_group_rule" "quortex-ingress-public" {
   cidr_blocks = var.subnet_cidr_blocks # restrict access to the same subnet as the load balancer's
 }
 
-resource "aws_security_group_rule" "quortex-ingress-private" {
+resource "aws_security_group_rule" "quortex_ingress_private" {
   count = length(var.load_balancer_private_app_backend_ports)
 
   description       = "Allow access to the private ingress service (nodeport ${var.load_balancer_private_app_backend_ports[count.index]}) from the Load Balancer"
