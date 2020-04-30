@@ -60,7 +60,7 @@ resource "aws_security_group" "quortex_private" {
   tags = merge({
     Name = var.name
     },
-    var.resource_labels
+    var.tags
   )
 }
 
@@ -78,7 +78,7 @@ resource "aws_lb" "quortex_private" {
   tags = merge({
     Name = var.name
     },
-    var.resource_labels
+    var.tags
   )
 }
 
@@ -101,7 +101,7 @@ resource "aws_lb_target_group" "quortex_private" {
   tags = merge({
     Name = var.name
     },
-    var.resource_labels
+    var.tags
   )
 }
 

@@ -87,8 +87,8 @@ variable "ssl_certificate_subdomain" {
   description = "The subdomain name that will be written in the TLS certificate. Can include a wildcard. The hosted zone name will be appended to form the complete domain name."
 }
 
-variable "resource_labels" {
+variable "tags" {
   type        = map
-  description = "The labels (a map of key/value pairs) to be applied to created resources."
+  description = "The tags (a map of key/value pairs) to be applied to created resources."
   default     = {}
 }
