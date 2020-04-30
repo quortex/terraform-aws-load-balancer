@@ -16,11 +16,11 @@
 
 
 resource "aws_acm_certificate" "cert" {
-  domain_name       = join(".", [var.ssl_certificate_subdomain, trimsuffix(data.aws_route53_zone.selected.name,".")]) # concatenate subdomain and hosted zone name
+  domain_name       = join(".", [var.ssl_certificate_subdomain, trimsuffix(data.aws_route53_zone.selected.name, ".")]) # concatenate subdomain and hosted zone name
   validation_method = "DNS"
 
   tags = merge({
-      Name = var.name
+    Name = var.name
     },
     var.resource_labels
   )

@@ -16,30 +16,30 @@
 
 
 resource "aws_security_group_rule" "quortex-ingress-public" {
-  count             = length(var.load_balancer_public_app_backend_ports)
+  count = length(var.load_balancer_public_app_backend_ports)
 
   description       = "Allow access to the public ingress service (nodeport ${var.load_balancer_public_app_backend_ports[count.index]}) from the Load Balancer"
   security_group_id = var.cluster_security_group_id
 
-  protocol          = "tcp"
-  type              = "ingress"
-  from_port         = var.load_balancer_public_app_backend_ports[count.index]
-  to_port           = var.load_balancer_public_app_backend_ports[count.index]
+  protocol  = "tcp"
+  type      = "ingress"
+  from_port = var.load_balancer_public_app_backend_ports[count.index]
+  to_port   = var.load_balancer_public_app_backend_ports[count.index]
 
-  cidr_blocks       = var.subnet_cidr_blocks # restrict access to the same subnet as the load balancer's
+  cidr_blocks = var.subnet_cidr_blocks # restrict access to the same subnet as the load balancer's
 }
 
 resource "aws_security_group_rule" "quortex-ingress-private" {
-  count             = length(var.load_balancer_private_app_backend_ports)
+  count = length(var.load_balancer_private_app_backend_ports)
 
   description       = "Allow access to the private ingress service (nodeport ${var.load_balancer_private_app_backend_ports[count.index]}) from the Load Balancer"
   security_group_id = var.cluster_security_group_id
-  
 
-  protocol          = "tcp"
-  type              = "ingress"
-  from_port         = var.load_balancer_private_app_backend_ports[count.index]
-  to_port           = var.load_balancer_private_app_backend_ports[count.index]
 
-  cidr_blocks       = var.subnet_cidr_blocks # restrict access to the same subnet as the load balancer's
+  protocol  = "tcp"
+  type      = "ingress"
+  from_port = var.load_balancer_private_app_backend_ports[count.index]
+  to_port   = var.load_balancer_private_app_backend_ports[count.index]
+
+  cidr_blocks = var.subnet_cidr_blocks # restrict access to the same subnet as the load balancer's
 }
