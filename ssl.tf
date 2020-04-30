@@ -22,7 +22,7 @@ resource "aws_acm_certificate" "cert" {
   tags = merge({
     Name = var.name
     },
-    var.resource_labels
+    var.tags
   )
 
   lifecycle {
