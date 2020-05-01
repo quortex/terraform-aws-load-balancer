@@ -92,3 +92,119 @@ variable "tags" {
   description = "The tags (a map of key/value pairs) to be applied to created resources."
   default     = {}
 }
+
+/** Advanced Load balancer params */
+
+/* Load balancer params */
+
+variable "idle_timeout" {
+  type        = number
+  description = "The time in seconds that the connection is allowed to be idle. Only valid for Load Balancers of type application."
+  default     = 60
+}
+
+/* Listener params */
+
+variable "ssl_policy" {
+  type        = string
+  description = "The name of the SSL Policy for the listener. Required if protocol is HTTPS or TLS."
+  default     = "ELBSecurityPolicy-2016-08"
+}
+
+/* Target params */
+
+variable "deregistration_delay" {
+  type        = number
+  description = "The amount time for Elastic Load Balancing to wait before changing the state of a deregistering target from draining to unused. The range is 0-3600 seconds. The default value is 300 seconds."
+  default     = 300
+}
+
+variable "slow_start" {
+  type        = number
+  description = "The amount time for targets to warm up before the load balancer sends them a full share of requests. The range is 30-900 seconds or 0 to disable. The default value is 0 seconds."
+  default     = 0
+}
+
+variable "load_balancing_algorithm_type" {
+  type        = string
+  description = "Determines how the load balancer selects targets when routing requests. Only applicable for Application Load Balancer Target Groups. The value is round_robin or least_outstanding_requests. The default is round_robin."
+  default     = "round_robin"
+}
+
+/* Stickiness */
+
+variable "stickiness_type" {
+  type        = string
+  description = "The type of sticky sessions. The only current possible value is lb_cookie."
+  default     = "lb_cookie"
+}
+
+variable "stickiness_cookie_duration" {
+  type        = number
+  description = " The time period, in seconds, during which requests from a client should be routed to the same target. After this time period expires, the load balancer-generated cookie is considered stale. The range is 1 second to 1 week (604800 seconds). The default value is 1 day (86400 seconds)."
+  default     = 86400
+}
+
+variable "stickiness_enabled" {
+  type        = bool
+  description = "Boolean to enable / disable stickiness. Default is true"
+  default     = true
+}
+
+/* Health check */
+
+variable "health_check_enabled" {
+  type        = bool
+  description = "Indicates whether health checks are enabled. Defaults to true."
+  default     = true
+}
+
+variable "health_check_interval" {
+  type        = number
+  description = "The approximate amount of time, in seconds, between health checks of an individual target. Minimum value 5 seconds, Maximum value 300 seconds. For lambda target  groups, it needs to be greater as the timeout of the underlying lambda. Default 30 seconds."
+  default     = 30
+}
+
+variable "health_check_path" {
+  type        = string
+  description = "The destination for the health check request."
+}
+
+variable "health_check_port" {
+  type        = string
+  description = "The port to use to connect with the target. Valid values are either ports 1-65535, or traffic-port. Defaults to traffic-port."
+  default     = "traffic-port"
+}
+
+variable "health_check_protocol" {
+  type        = string
+  description = "The protocol to use to connect with the target. Defaults to HTTP."
+  default     = "HTTP"
+}
+
+variable "health_check_timeout" {
+  type        = number
+  description = "The amount of time, in seconds, during which no response means a failed health check. For Application Load Balancers, the range is 2 to 120 seconds, and the default is 5 seconds for the instance target type"
+  default     = 5
+}
+
+
+variable "health_check_healthy_threshold" {
+  type        = number
+  description = "The number of consecutive health checks successes required before considering an unhealthy target healthy. Defaults to 3."
+  default     = 3
+}
+
+
+variable "health_check_unhealthy_threshold" {
+  type        = number
+  description = "The number of consecutive health check failures required before considering the target unhealthy . For Network Load Balancers, this value must be the same as the healthy_threshold. Defaults to 3."
+  default     = 3
+}
+
+variable "health_check_matcher" {
+  type        = string
+  description = " (Required for HTTP/HTTPS ALB) The HTTP codes to use when checking for a successful response from a target. You can specify multiple values (for example, \"200,202\") or a range of values (for example, \"200-299\")."
+}
+
+
