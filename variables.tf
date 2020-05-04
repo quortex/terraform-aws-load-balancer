@@ -14,9 +14,46 @@
  * limitations under the License.
  */
 
-variable "name" {
+variable "private_lb_security_group_name" {
   type        = string
-  description = "This value will be in the Name tag of all resources."
+  description = "Name of the security group for the private ALB"
+  default     = "quortex-private"
+}
+
+variable "private_lb_name" {
+  type        = string
+  description = "Name of the private ALB"
+  default     = "quortex-private"
+}
+
+variable "private_lb_target_group_name" {
+  type        = string
+  description = "Name of the private ALB target group name"
+  default     = "quortex-private"
+}
+
+variable "public_lb_security_group_name" {
+  type        = string
+  description = "Name of the security group for the public ALB"
+  default     = "quortex-public"
+}
+
+variable "public_lb_name" {
+  type        = string
+  description = "Name of the public ALB"
+  default     = "quortex-public"
+}
+
+variable "public_lb_target_group_name" {
+  type        = string
+  description = "Name of the public ALB target group name"
+  default     = "quortex-public"
+}
+
+variable "ssl_certificate_name" {
+  type        = string
+  description = "Name of the SSL certificate"
+  default     = "quortex"
 }
 
 variable "region" {
