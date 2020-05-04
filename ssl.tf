@@ -20,7 +20,7 @@ resource "aws_acm_certificate" "cert" {
   validation_method = "DNS"
 
   tags = merge({
-    Name = var.name
+    Name = var.ssl_certificate_name
     },
     var.tags
   )

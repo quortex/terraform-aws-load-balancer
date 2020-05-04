@@ -29,10 +29,10 @@
 
 # Security group
 resource "aws_security_group" "quortex_public" {
-
-  name        = "${var.name}-sg-public"
+  name        = var.public_lb_security_group_name
   description = "Security group for the public ALB"
-  vpc_id      = var.vpc_id
+
+  vpc_id = var.vpc_id
 
   ingress {
     description = "Allow TLS HTTP from anywhere"
@@ -58,7 +58,7 @@ resource "aws_security_group" "quortex_public" {
   }
 
   tags = merge({
-    Name = var.name
+    Name = var.public_lb_security_group_name
     },
     var.tags
   )
@@ -66,9 +66,7 @@ resource "aws_security_group" "quortex_public" {
 
 # Load balancer (ALB)
 resource "aws_lb" "quortex_public" {
-  # name               = "${var.name}-lb-pub"
-  # name_prefix        = var.name
-  # TODO: name should contain the cluster name, but it is limited to 32 characters
+  name = var.public_lb_name
 
   internal           = false
   load_balancer_type = "application"
@@ -79,7 +77,7 @@ resource "aws_lb" "quortex_public" {
   idle_timeout = var.idle_timeout
 
   tags = merge({
-    Name = var.name
+    Name = var.public_lb_name
     },
     var.tags
   )
@@ -93,38 +91,37 @@ resource "aws_lb_target_group" "quortex_public" {
   # No target group will be created (yet) if the no port is defined
   count = length(var.load_balancer_public_app_backend_ports) > 0 ? 1 : 0
 
-  #name        = "${var.name}-target-group-public"
-  # TODO: name should contain the cluster name, but it is limited to 32 characters
+  name   = var.public_lb_target_group_name
   vpc_id = var.vpc_id
 
   target_type = "instance"
   protocol    = "HTTP"
   port        = var.load_balancer_public_app_backend_ports[0]
 
-  deregistration_delay = var.deregistration_delay
-  slow_start = var.slow_start
+  deregistration_delay          = var.deregistration_delay
+  slow_start                    = var.slow_start
   load_balancing_algorithm_type = var.load_balancing_algorithm_type
 
   stickiness {
-    type = var.stickiness_type
+    type            = var.stickiness_type
     cookie_duration = var.stickiness_cookie_duration
-    enabled = var.stickiness_enabled
+    enabled         = var.stickiness_enabled
   }
 
   health_check {
-    enabled = var.health_check_enabled
-    interval = var.health_check_interval
-    path = var.health_check_path
-    port = var.health_check_port
-    protocol = var.health_check_protocol
-    timeout = var.health_check_timeout
-    healthy_threshold = var.health_check_healthy_threshold
+    enabled             = var.health_check_enabled
+    interval            = var.health_check_interval
+    path                = var.health_check_path
+    port                = var.health_check_port
+    protocol            = var.health_check_protocol
+    timeout             = var.health_check_timeout
+    healthy_threshold   = var.health_check_healthy_threshold
     unhealthy_threshold = var.health_check_unhealthy_threshold
-    matcher = var.health_check_matcher
+    matcher             = var.health_check_matcher
   }
 
   tags = merge({
-    Name = var.name
+    Name = var.public_lb_target_group_name
     },
     var.tags
   )
