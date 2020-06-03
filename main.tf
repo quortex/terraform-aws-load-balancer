@@ -14,19 +14,6 @@
  * limitations under the License.
  */
 
-
-# There are 3 types of load balancers in AWS: 
-# - Classic
-# - NLB (Network Load Balancer)
-# - ALB (Application Load Balancer)
-#
-# Here an Application Load Balancer is created.
-# It listens for HTTP and HTTPS, and forwards HTTPS to instances of the 
-# target group.
-# The target group is made of instances, which are the instances of the
-# autoscaling group. 
-
-
 # AWS provider configuration
 # version constraints defined in versions.tf
 provider "aws" {
