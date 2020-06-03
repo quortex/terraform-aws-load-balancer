@@ -70,7 +70,7 @@ resource "aws_lb" "quortex_private" {
 
   internal           = false
   load_balancer_type = "application"
-  security_groups    = ["${aws_security_group.quortex_private.id}"]
+  security_groups    = [aws_security_group.quortex_private.id]
   subnets            = var.subnet_ids
 
   # Advanced parameters
