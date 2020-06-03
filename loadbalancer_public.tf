@@ -74,7 +74,7 @@ resource "aws_lb" "quortex_public" {
   subnets            = var.subnet_ids
 
   # Advanced parameters
-  idle_timeout = var.idle_timeout
+  idle_timeout = var.public_lb_idle_timeout
 
   tags = merge({
     Name = var.public_lb_name
@@ -98,26 +98,26 @@ resource "aws_lb_target_group" "quortex_public" {
   protocol    = "HTTP"
   port        = var.load_balancer_public_app_backend_ports[0]
 
-  deregistration_delay          = var.deregistration_delay
-  slow_start                    = var.slow_start
-  load_balancing_algorithm_type = var.load_balancing_algorithm_type
+  deregistration_delay          = var.public_lb_deregistration_delay
+  slow_start                    = var.public_lb_slow_start
+  load_balancing_algorithm_type = var.public_lb_load_balancing_algorithm_type
 
   stickiness {
-    type            = var.stickiness_type
-    cookie_duration = var.stickiness_cookie_duration
-    enabled         = var.stickiness_enabled
+    type            = var.public_lb_stickiness_type
+    cookie_duration = var.public_lb_stickiness_cookie_duration
+    enabled         = var.public_lb_stickiness_enabled
   }
 
   health_check {
-    enabled             = var.health_check_enabled
-    interval            = var.health_check_interval
-    path                = var.health_check_path
-    port                = var.health_check_port
-    protocol            = var.health_check_protocol
-    timeout             = var.health_check_timeout
-    healthy_threshold   = var.health_check_healthy_threshold
-    unhealthy_threshold = var.health_check_unhealthy_threshold
-    matcher             = var.health_check_matcher
+    enabled             = var.public_lb_health_check_enabled
+    interval            = var.public_lb_health_check_interval
+    path                = var.public_lb_health_check_path
+    port                = var.public_lb_health_check_port
+    protocol            = var.public_lb_health_check_protocol
+    timeout             = var.public_lb_health_check_timeout
+    healthy_threshold   = var.public_lb_health_check_healthy_threshold
+    unhealthy_threshold = var.public_lb_health_check_unhealthy_threshold
+    matcher             = var.public_lb_health_check_matcher
   }
 
   tags = merge({
@@ -140,7 +140,7 @@ resource "aws_lb_listener" "quortex_public_tls" {
   load_balancer_arn = aws_lb.quortex_public.arn
   port              = "443"
   protocol          = "HTTPS"
-  ssl_policy        = var.ssl_policy
+  ssl_policy        = var.public_lb_ssl_policy
   certificate_arn   = aws_acm_certificate.cert.arn
 
   default_action {
