@@ -30,7 +30,9 @@ For internal services with restricted access (api, grafana, weave…):
 
 The following resources are also created, and are common to external and internal services:
 - rules are added to the cluster’s security group to allow the ALB to join the services’ NodePorts.
-- a TLS certificate, in AWS Certificate Manager, with the domain name “*.<cluster_name>.<hosted_zone>”
+- (optional) a TLS certificate, in AWS Certificate Manager, with the domain name “*.<cluster_name>.<hosted_zone>”
+
+The TLS certificate can be created by this module (it will be issued and validated in AWS Certificate Manager), or a certificate already existing in ACM can be specified.
 
 
 ## Usage example

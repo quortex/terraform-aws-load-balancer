@@ -16,6 +16,8 @@
 
 
 resource "aws_acm_certificate" "cert" {
+  count = var.ssl_certificate_arn == null ? 1 : 0
+
   domain_name       = join(".", [var.ssl_certificate_subdomain, trimsuffix(data.aws_route53_zone.selected.name, ".")]) # concatenate subdomain and hosted zone name
   validation_method = "DNS"
 
@@ -31,14 +33,18 @@ resource "aws_acm_certificate" "cert" {
 }
 
 resource "aws_route53_record" "cert_validation" {
-  name    = aws_acm_certificate.cert.domain_validation_options.0.resource_record_name
-  type    = aws_acm_certificate.cert.domain_validation_options.0.resource_record_type
+  count = var.ssl_certificate_arn == null ? 1 : 0
+
+  name    = aws_acm_certificate.cert[0].domain_validation_options.0.resource_record_name
+  type    = aws_acm_certificate.cert[0].domain_validation_options.0.resource_record_type
   zone_id = data.aws_route53_zone.selected.zone_id
-  records = [aws_acm_certificate.cert.domain_validation_options.0.resource_record_value]
+  records = [aws_acm_certificate.cert[0].domain_validation_options.0.resource_record_value]
   ttl     = 60
 }
 
 resource "aws_acm_certificate_validation" "cert" {
-  certificate_arn         = aws_acm_certificate.cert.arn
-  validation_record_fqdns = [aws_route53_record.cert_validation.fqdn]
+  count = var.ssl_certificate_arn == null ? 1 : 0
+
+  certificate_arn         = aws_acm_certificate.cert[0].arn
+  validation_record_fqdns = [aws_route53_record.cert_validation[0].fqdn]
 }
