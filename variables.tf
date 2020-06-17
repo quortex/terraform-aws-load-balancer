@@ -52,7 +52,7 @@ variable "public_lb_target_group_name" {
 
 variable "ssl_certificate_name" {
   type        = string
-  description = "Name of the SSL certificate"
+  description = "Name of the SSL certificate.  Not used if an existing certificate ARN is provided."
   default     = "quortex"
 }
 
@@ -119,9 +119,16 @@ variable "dns_records_public" {
   default     = {}
 }
 
+variable "ssl_certificate_arn" {
+  type        = string
+  description = "The ARN identifier of an existing Certificate in AWS Certificate Manager, to be used for HTTPS requests. If not defined, a new certificate will be issued and validated in the AWS Certificate Manager."
+  default     = null
+}
+
 variable "ssl_certificate_subdomain" {
   type        = string
-  description = "The subdomain name that will be written in the TLS certificate. Can include a wildcard. The hosted zone name will be appended to form the complete domain name."
+  description = "The subdomain name that will be written in the TLS certificate. Can include a wildcard. The hosted zone name will be appended to form the complete domain name. Not used if an existing certificate ARN is provided."
+  default     = null
 }
 
 variable "tags" {
