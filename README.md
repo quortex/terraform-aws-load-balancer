@@ -28,6 +28,8 @@ For internal services with restricted access (api, grafana, weave…):
 - a target group, which port should be set to the Kubernetes service NodePort (can be empty during a first pass, and defined after the services are deployed inside the cluster)
 - DNS record aliases (api.<cluster_name>, grafana.<cluster_name>...) for the ALB (created under an existing hosted zone)
 
+The load balancers should be in the public subnets.
+
 The following resources are also created, and are common to external and internal services:
 - rules are added to the cluster’s security group to allow the ALB to join the services’ NodePorts.
 - (optional) a TLS certificate, in AWS Certificate Manager, with the domain name “*.<cluster_name>.<hosted_zone>”
@@ -47,8 +49,8 @@ module "load-balancer" {
 
   # values from the Quortex network module:
   vpc_id                                  = module.network.vpc_id
-  subnet_ids                              = module.network.worker_subnet_ids
-  subnet_cidr_blocks                      = module.network.worker_subnet_cidr_blocks
+  subnet_ids                              = module.network.public_subnet_ids
+  access_cidr_blocks                      = module.network.vpc_cidr_block
 
   # values from the Quortex cluster module:
   cluster_security_group_id               = module.eks.cluster_security_group_id
@@ -100,7 +102,7 @@ File a GitHub [issue](https://github.com/quortex/terraform-aws-load-balancer/iss
 
 
   [logo]: https://storage.googleapis.com/quortex-assets/logo.webp
-  [infra_diagram]: https://storage.googleapis.com/quortex-assets/infra_aws_001.jpg
+  [infra_diagram]: https://storage.googleapis.com/quortex-assets/infra_aws_002.jpg
 
   [email]: mailto:info@quortex.io
 
