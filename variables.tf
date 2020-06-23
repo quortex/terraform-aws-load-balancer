@@ -68,12 +68,12 @@ variable "vpc_id" {
 
 variable "subnet_ids" {
   type        = list(string)
-  description = "The IDs of the subnets (worker node subnets)"
+  description = "The IDs of the subnets in which to place the load balancers (public subnets)"
 }
 
-variable "subnet_cidr_blocks" {
+variable "access_cidr_blocks" {
   type        = list(string)
-  description = "CIDR blocks of the subnets"
+  description = "CIDR blocks to allow in the target group security group."
 }
 
 variable "cluster_security_group_id" {

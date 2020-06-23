@@ -26,7 +26,7 @@ resource "aws_security_group_rule" "quortex_ingress_public" {
   from_port = var.load_balancer_public_app_backend_ports[count.index]
   to_port   = var.load_balancer_public_app_backend_ports[count.index]
 
-  cidr_blocks = var.subnet_cidr_blocks # restrict access to the same subnet as the load balancer's
+  cidr_blocks = var.access_cidr_blocks
 }
 
 resource "aws_security_group_rule" "quortex_ingress_private" {
@@ -41,5 +41,5 @@ resource "aws_security_group_rule" "quortex_ingress_private" {
   from_port = var.load_balancer_private_app_backend_ports[count.index]
   to_port   = var.load_balancer_private_app_backend_ports[count.index]
 
-  cidr_blocks = var.subnet_cidr_blocks # restrict access to the same subnet as the load balancer's
+  cidr_blocks = var.access_cidr_blocks
 }
