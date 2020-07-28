@@ -14,27 +14,24 @@
  * limitations under the License.
 */
 
-locals {
-  autoscaling_attachments_public_alb  = setproduct(var.load_balancer_autoscaling_group_names, aws_lb_target_group.quortex_public[*].arn)
-  autoscaling_attachments_private_alb = setproduct(var.load_balancer_autoscaling_group_names, aws_lb_target_group.quortex_private[*].arn)
-}
-
 # Attach each autoscaling group to each target group
 # The setproduct is maybe a bit overkill since there should be only 0 or 1 target group...
 
 # Attach the autoscaling groups to the public ALB target groups 
 resource "aws_autoscaling_attachment" "quortex_public" {
-  count = length(local.autoscaling_attachments_public_alb)
-
-  autoscaling_group_name = local.autoscaling_attachments_public_alb[count.index][0]
-  alb_target_group_arn   = local.autoscaling_attachments_public_alb[count.index][1]
+  # No target group will be created (yet) if backend port is not defined
+  count = length(var.load_balancer_public_app_backend_ports) > 0 ? length(var.load_balancer_autoscaling_group_names) : 0
+  
+  autoscaling_group_name = var.load_balancer_autoscaling_group_names[count.index]
+  alb_target_group_arn   = aws_lb_target_group.quortex_public[0].arn
 }
 
 # Attach the autoscaling groups to the private ALB target groups
 resource "aws_autoscaling_attachment" "quortex_private" {
-  count = length(local.autoscaling_attachments_private_alb)
-
-  autoscaling_group_name = local.autoscaling_attachments_private_alb[count.index][0]
-  alb_target_group_arn   = local.autoscaling_attachments_private_alb[count.index][1]
+  # No target group will be created (yet) if backend port is not defined
+  count = length(var.load_balancer_private_app_backend_ports) > 0 ? length(var.load_balancer_autoscaling_group_names) : 0
+  
+  autoscaling_group_name = var.load_balancer_autoscaling_group_names[count.index]
+  alb_target_group_arn   = aws_lb_target_group.quortex_private[0].arn
 }
 
