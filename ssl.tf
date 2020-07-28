@@ -18,7 +18,7 @@
 resource "aws_acm_certificate" "cert" {
   count = var.ssl_certificate_arn == null ? 1 : 0
 
-  domain_name       = join(".", [var.ssl_certificate_subdomain, trimsuffix(data.aws_route53_zone.selected.name, ".")]) # concatenate subdomain and hosted zone name
+  domain_name       = var.ssl_certificate_domain_name
   validation_method = "DNS"
 
   tags = merge({
@@ -37,7 +37,7 @@ resource "aws_route53_record" "cert_validation" {
 
   name    = aws_acm_certificate.cert[0].domain_validation_options.0.resource_record_name
   type    = aws_acm_certificate.cert[0].domain_validation_options.0.resource_record_type
-  zone_id = data.aws_route53_zone.selected.zone_id
+  zone_id = data.aws_route53_zone.selected[0].zone_id
   records = [aws_acm_certificate.cert[0].domain_validation_options.0.resource_record_value]
   ttl     = 60
 }
