@@ -16,6 +16,8 @@
 
 
 data "aws_route53_zone" "selected" {
+  count = var.dns_hosted_zone_id == null ? 0 : 1
+
   zone_id = var.dns_hosted_zone_id
 }
 
@@ -30,7 +32,7 @@ locals {
 resource "aws_route53_record" "quortex_public" {
   for_each = var.dns_records_public
 
-  zone_id = data.aws_route53_zone.selected.zone_id
+  zone_id = data.aws_route53_zone.selected[0].zone_id
   name    = each.value
   type    = "A"
 
@@ -45,7 +47,7 @@ resource "aws_route53_record" "quortex_public" {
 resource "aws_route53_record" "quortex_private" {
   for_each = var.dns_records_private
 
-  zone_id = data.aws_route53_zone.selected.zone_id
+  zone_id = data.aws_route53_zone.selected[0].zone_id
   name    = each.value
   type    = "A"
 

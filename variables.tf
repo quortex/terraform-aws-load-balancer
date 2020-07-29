@@ -104,7 +104,8 @@ variable "load_balancer_autoscaling_group_names" {
 
 variable "dns_hosted_zone_id" {
   type        = string
-  description = "The ID of the hosted zone in Route53, under which the DNS record should be created."
+  description = "The ID of the hosted zone in Route53, under which the DNS record should be created. Can be null if no DNS records need to be created. Required if ssl_certificate_arn is null, to validate the certificate created by this module."
+  default     = null
 }
 
 variable "dns_records_private" {
@@ -125,9 +126,9 @@ variable "ssl_certificate_arn" {
   default     = null
 }
 
-variable "ssl_certificate_subdomain" {
+variable "ssl_certificate_domain_name" {
   type        = string
-  description = "The subdomain name that will be written in the TLS certificate. Can include a wildcard. The hosted zone name will be appended to form the complete domain name. Not used if an existing certificate ARN is provided."
+  description = "The complete domain name that will be written in the TLS certificate. Can include a wildcard. Not used if an existing certificate ARN is provided."
   default     = null
 }
 

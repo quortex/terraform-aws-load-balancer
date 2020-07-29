@@ -61,7 +61,7 @@ module "load-balancer" {
   load_balancer_private_app_backend_ports = [var.service_nodeport_private]
 
   # SSL configuration.
-  ssl_certificate_subdomain               = "*.domain"
+  ssl_certificate_domain_name             = "*.mydomain.com"
     
   # DNS configuration.
   dns_hosted_zone_id                      = var.hosted_zone_id
