@@ -38,7 +38,7 @@ locals {
 
 # Security group
 resource "aws_security_group" "quortex_public" {
-  name        = var.public_lb_security_group_name
+  name        = local.public_lb_security_group_name
   description = "Security group for the public ALB"
 
   vpc_id = var.vpc_id
@@ -67,7 +67,7 @@ resource "aws_security_group" "quortex_public" {
   }
 
   tags = merge({
-    Name = var.public_lb_security_group_name
+    Name = local.public_lb_security_group_name
     },
     var.tags
   )
@@ -75,7 +75,7 @@ resource "aws_security_group" "quortex_public" {
 
 # Load balancer (ALB)
 resource "aws_lb" "quortex_public" {
-  name = var.public_lb_name
+  name = local.public_lb_name
 
   internal           = false
   load_balancer_type = "application"
@@ -86,7 +86,7 @@ resource "aws_lb" "quortex_public" {
   idle_timeout = var.public_lb_idle_timeout
 
   tags = merge({
-    Name = var.public_lb_name
+    Name = local.public_lb_name
     },
     var.tags
   )
@@ -100,7 +100,7 @@ resource "aws_lb_target_group" "quortex_public" {
   # No target group will be created (yet) if the no port is defined
   count = length(var.load_balancer_public_app_backend_ports) > 0 ? 1 : 0
 
-  name   = var.public_lb_target_group_name
+  name   = local.public_lb_target_group_name
   vpc_id = var.vpc_id
 
   target_type = "instance"
@@ -130,7 +130,7 @@ resource "aws_lb_target_group" "quortex_public" {
   }
 
   tags = merge({
-    Name = var.public_lb_target_group_name
+    Name = local.public_lb_target_group_name
     },
     var.tags
   )

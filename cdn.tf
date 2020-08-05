@@ -118,7 +118,7 @@ resource "aws_cloudfront_distribution" "lb_distribution" {
 
   # tags
   tags = merge({
-    Name = var.cdn_distribution_name
+    Name = local.cdn_distribution_name
     },
     var.tags
   )

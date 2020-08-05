@@ -14,58 +14,64 @@
  * limitations under the License.
  */
 
+variable "resource_name" {
+  type        = string
+  description = "A name from which the name of the resources will be chosen. Note that each resource name can be set individually."
+  default     = "quortex"
+}
+
 variable "private_lb_security_group_name" {
   type        = string
   description = "Name of the security group for the private ALB"
-  default     = "quortex-private"
+  default     = ""
 }
 
 variable "private_lb_name" {
   type        = string
   description = "Name of the private ALB"
-  default     = "quortex-private"
+  default     = ""
 }
 
 variable "private_lb_target_group_name" {
   type        = string
   description = "Name of the private ALB target group name"
-  default     = "quortex-private"
+  default     = ""
 }
 
 variable "public_lb_security_group_name" {
   type        = string
   description = "Name of the security group for the public ALB"
-  default     = "quortex-public"
+  default     = ""
 }
 
 variable "public_lb_name" {
   type        = string
   description = "Name of the public ALB"
-  default     = "quortex-public"
+  default     = ""
 }
 
 variable "public_lb_target_group_name" {
   type        = string
   description = "Name of the public ALB target group name"
-  default     = "quortex-public"
+  default     = ""
 }
 
 variable "ssl_certificate_name" {
   type        = string
   description = "Name of the SSL certificate.  Not used if an existing certificate ARN is provided."
-  default     = "quortex"
+  default     = ""
 }
 
 variable "cdn_distribution_name" {
   type        = string
   description = "Name of the CloudFront distribution."
-  default     = "quortex"
+  default     = ""
 }
 
 variable "cdn_ssl_certificate_name" {
   type        = string
   description = "Name of the SSL certificate.  Not used if an existing certificate ARN is provided."
-  default     = "quortex"
+  default     = ""
 }
 
 variable "region" {
