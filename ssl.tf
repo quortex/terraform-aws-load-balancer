@@ -15,6 +15,12 @@
 */
 
 
+# There are 2 options for specifying a TLS certificate for the Load Balancer: 
+# - specify the ARN of an already existing and validated certificate
+# - create the certificate ourselves in AWS Certificate Manager, and validate it.
+# The resources below are used in the latter case. 
+
+# Certificate in AWS Certificate Manager
 resource "aws_acm_certificate" "cert" {
   count = var.ssl_certificate_arn == null ? 1 : 0
 
@@ -22,7 +28,7 @@ resource "aws_acm_certificate" "cert" {
   validation_method = "DNS"
 
   tags = merge({
-    Name = var.ssl_certificate_name
+    Name = local.ssl_certificate_name
     },
     var.tags
   )
@@ -32,6 +38,7 @@ resource "aws_acm_certificate" "cert" {
   }
 }
 
+# DNS record to validate this certificate
 resource "aws_route53_record" "cert_validation" {
   count = var.ssl_certificate_arn == null ? 1 : 0
 
@@ -42,6 +49,7 @@ resource "aws_route53_record" "cert_validation" {
   ttl     = 60
 }
 
+# Certificate validation
 resource "aws_acm_certificate_validation" "cert" {
   count = var.ssl_certificate_arn == null ? 1 : 0
 
