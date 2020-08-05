@@ -141,7 +141,7 @@ resource "aws_lb_listener" "quortex_public_tls" {
   port              = "443"
   protocol          = "HTTPS"
   ssl_policy        = var.public_lb_ssl_policy
-  certificate_arn   = var.ssl_certificate_arn == null ? aws_acm_certificate.cert[0].arn : var.ssl_certificate_arn
+  certificate_arn   = var.ssl_certificate_arn == null ? aws_acm_certificate_validation.cert[0].certificate_arn : var.ssl_certificate_arn
 
   default_action {
     type             = "forward"
