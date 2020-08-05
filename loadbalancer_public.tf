@@ -26,6 +26,15 @@
 # The target group is made of instances, which are the instances of the
 # autoscaling group. 
 
+data "aws_ip_ranges" "cloudfront" {
+  regions  = ["global"]
+  services = ["cloudfront"]
+}
+
+locals {
+  # Important note: the default quota for "Inbound or outbound rules per security group" is 60, it is not sufficient to fit all the Cloudfront IP ranges. This quota should be increased in the region used.
+  public_lb_allowed_ip_ranges = var.load_balancer_public_restrict_access ? concat(data.aws_ip_ranges.cloudfront.cidr_blocks, var.load_balancer_public_whitelisted_ips) : ["0.0.0.0/0"]
+}
 
 # Security group
 resource "aws_security_group" "quortex_public" {
@@ -35,19 +44,19 @@ resource "aws_security_group" "quortex_public" {
   vpc_id = var.vpc_id
 
   ingress {
-    description = "Allow TLS HTTP from anywhere"
+    description = "Allow TLS HTTP"
     from_port   = 443
     to_port     = 443
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = local.public_lb_allowed_ip_ranges
   }
 
   ingress {
-    description = "Allow simple HTTP from anywhere"
+    description = "Allow simple HTTP"
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = local.public_lb_allowed_ip_ranges
   }
 
   egress {

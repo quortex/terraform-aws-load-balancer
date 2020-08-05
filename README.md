@@ -36,6 +36,10 @@ The following resources are also created, and are common to external and interna
 
 The TLS certificate can be created by this module (it will be issued and validated in AWS Certificate Manager), or a certificate already existing in ACM can be specified.
 
+If the CDN distribution is requested:
+- a Cloudfront Distribution
+- a DNS record for the distribution
+- a Certificate for the distribution
 
 ## Usage example
 
@@ -79,6 +83,21 @@ module "load-balancer" {
 }
 
 ```
+
+## CDN distribution
+
+A CDN distribution is created in the AWS CloudFront service. This is optional, and not created by default.
+
+A single distribution is created, with a single origin, targeting the "public" load balancer.
+
+If DNS records are enabled, the DNS name we created for the public load balancer is targeted. 
+If DNS records are disabled, then the original DNS name of the LB is targeted (eg: blablabla-144474062.eu-west-3.elb.amazonaws.com).
+
+If the CDN distribution is created, the access to the public LB can be restricted to some IP addresses + the CloudFront IP ranges (the quota for the number of rules in a security group need to be increased from 60 to 150 in order to fit all these IP ranges).
+
+An additional DNS record can be created for the CDN distribution.
+
+The certificate for the CDN is created in AWS Certificate Manager (or an existing and validated certificate ARN can be provided), and it includes the domain name created for the CDN distribution. This certificate is located in the N. Virginia region (required by AWS).
 
 ---
 
