@@ -33,3 +33,8 @@ output "dns_records_private" {
   value       = local.private_domains
   description = "A map with dns records in given dns zone for each dns_records_private provided in variables."
 }
+
+output "dns_record_cdn" {
+  value       = local.cdn_domain_name
+  description = "The DNS record for the CDN"
+}
