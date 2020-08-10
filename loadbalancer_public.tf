@@ -33,7 +33,7 @@ data "aws_ip_ranges" "cloudfront" {
 
 locals {
   # Important note: the default quota for "Inbound or outbound rules per security group" is 60, it is not sufficient to fit all the Cloudfront IP ranges. This quota should be increased in the region used.
-  public_lb_allowed_ip_ranges = var.load_balancer_public_restrict_access ? concat(data.aws_ip_ranges.cloudfront.cidr_blocks, var.load_balancer_public_whitelisted_ips) : ["0.0.0.0/0"]
+  public_lb_allowed_ip_ranges = var.load_balancer_public_restrict_access ? concat( var.cdn_create_distribution ? data.aws_ip_ranges.cloudfront.cidr_blocks : [], var.load_balancer_public_whitelisted_ips) : ["0.0.0.0/0"]
 }
 
 # Security group
