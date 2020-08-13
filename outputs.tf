@@ -33,3 +33,13 @@ output "dns_records_private" {
   value       = local.private_domains
   description = "A map with dns records in given dns zone for each dns_records_private provided in variables."
 }
+
+output "dns_record_cdn" {
+  value       = local.cdn_domain_name
+  description = "The DNS record for the CDN"
+}
+
+output "cdn_distribution_id" {
+  value       = length(aws_cloudfront_distribution.lb_distribution) != 0 ? aws_cloudfront_distribution.lb_distribution[0].id : null
+  description = "The ID of the CloudFront distribution, if enabled"
+}
