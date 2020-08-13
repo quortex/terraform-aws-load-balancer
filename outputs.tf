@@ -38,3 +38,8 @@ output "dns_record_cdn" {
   value       = local.cdn_domain_name
   description = "The DNS record for the CDN"
 }
+
+output "cdn_distribution_id" {
+  value       = length(aws_cloudfront_distribution.lb_distribution) != 0 ? aws_cloudfront_distribution.lb_distribution[0].id : null
+  description = "The ID of the CloudFront distribution, if enabled"
+}
