@@ -91,7 +91,6 @@ resource "aws_lb_target_group" "quortex_private" {
   # No target group will be created (yet) if the no port is defined
   count = length(var.load_balancer_private_app_backend_ports) > 0 ? 1 : 0
 
-  name   = local.private_lb_target_group_name
   vpc_id = var.vpc_id
 
   target_type = "instance"
@@ -125,6 +124,11 @@ resource "aws_lb_target_group" "quortex_private" {
     },
     var.tags
   )
+
+  # workaround for failing target group modifications
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 # Listeners for the ALB
