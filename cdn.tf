@@ -30,6 +30,14 @@ resource "aws_cloudfront_distribution" "lb_distribution" {
   is_ipv6_enabled = var.cdn_ipv6_enabled
   price_class     = var.cdn_price_class
 
+  dynamic "logging_config" {
+    for_each = var.cdn_logging_enable ? [true] : []
+    content {
+      bucket = var.cdn_logging_bucket
+      prefix = var.cdn_logging_prefix
+    }
+  }
+
   origin {
     origin_id   = "main"
     domain_name = local.origin_domain_name

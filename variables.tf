@@ -186,6 +186,24 @@ variable "cdn_ssl_certificate_arn" {
   default     = null
 }
 
+variable "cdn_logging_enable" {
+  type        = bool
+  description = "If true, the Cloudfront access logs will be written to an S3 bucket"
+  default     = false
+}
+
+variable "cdn_logging_bucket" {
+  type        = string
+  description = "The Amazon S3 bucket to store the access logs in. Required if logging is enabled. Example: mybucket.s3.amazonaws.com"
+  default     = null
+}
+
+variable "cdn_logging_prefix" {
+  type        = string
+  description = "An optional string that you want CloudFront to prefix to the access log filenames for this distribution, for example, myprefix/. Default is an empty string (no prefix)."
+  default     = ""
+}
+
 variable "tags" {
   type        = map
   description = "The tags (a map of key/value pairs) to be applied to created resources."
