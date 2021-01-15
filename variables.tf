@@ -99,6 +99,30 @@ variable "cluster_security_group_id" {
   description = "ID of the cluster security group created by EKS. Rules will be added to it, to allow traffic to the backend nodeports (restricted to the subnet cidr)."
 }
 
+variable "load_balancer_public_expose_http" {
+  type        = bool
+  default     = true
+  description = "Set to true if the HTTP port 80 should be exposed (for the public load balancer)"
+}
+
+variable "load_balancer_public_expose_https" {
+  type        = bool
+  default     = true
+  description = "Set to true if the HTTPS port 443 should be exposed (for the public load balancer)"
+}
+
+variable "load_balancer_private_expose_http" {
+  type        = bool
+  default     = true
+  description = "Set to true if the HTTP port 80 should be exposed (for the private load balancer)"
+}
+
+variable "load_balancer_private_expose_https" {
+  type        = bool
+  default     = true
+  description = "Set to true if the HTTPS port 443 should be exposed (for the private load balancer)"
+}
+
 variable "load_balancer_public_app_backend_ports" {
   type        = list(number)
   description = "The port number on which backend instances are listening"
