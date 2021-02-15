@@ -211,7 +211,7 @@ variable "cdn_ssl_certificate_arn" {
 }
 
 variable "tags" {
-  type        = map
+  type        = map(any)
   description = "The tags (a map of key/value pairs) to be applied to created resources."
   default     = {}
 }

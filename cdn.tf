@@ -16,7 +16,7 @@
 
 
 locals {
-  cdn_domain_name = var.cdn_dns_record != null ? "${var.cdn_dns_record}.${trimsuffix(data.aws_route53_zone.selected[0].name, ".")}" : null
+  cdn_domain_name    = var.cdn_dns_record != null ? "${var.cdn_dns_record}.${trimsuffix(data.aws_route53_zone.selected[0].name, ".")}" : null
   origin_domain_name = var.cdn_origin != null ? "${var.dns_records_public[var.cdn_origin]}.${trimsuffix(data.aws_route53_zone.selected[0].name, ".")}" : aws_lb.quortex_public.dns_name
 }
 
@@ -102,8 +102,8 @@ resource "aws_cloudfront_distribution" "lb_distribution" {
 
   # TLS configuration
   viewer_certificate {
-    acm_certificate_arn            = var.cdn_ssl_certificate_arn != null ? var.cdn_ssl_certificate_arn : aws_acm_certificate_validation.cert_cdn[0].certificate_arn
-    cloudfront_default_certificate = false
+    acm_certificate_arn            = var.cdn_ssl_certificate_arn != null ? var.cdn_ssl_certificate_arn : local.has_cdn_cert ? aws_acm_certificate_validation.cert_cdn[0].certificate_arn : null
+    cloudfront_default_certificate = !local.has_cdn_cert
     minimum_protocol_version       = "TLSv1.2_2019"
     ssl_support_method             = "sni-only"
   }
