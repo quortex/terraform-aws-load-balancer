@@ -48,7 +48,6 @@ If the CDN distribution is requested:
 module "load-balancer" {
   source = "quortex/load-balancer/aws"
   
-  region                                  = "eu-west-3"
   name                                    = "quortexcluster"
 
   # values from the Quortex network module:

@@ -33,9 +33,9 @@ resource "aws_security_group" "quortex_private" {
   description = "Security group for the private ALB"
 
   vpc_id = var.vpc_id
-  
-  dynamic "ingress" {  
-    for_each = var.load_balancer_private_expose_https ? [true]: []
+
+  dynamic "ingress" {
+    for_each = var.load_balancer_private_expose_https ? [true] : []
     content {
       description = "Allow TLS HTTP from whitelisted ip ranges only"
       from_port   = 443
@@ -45,8 +45,8 @@ resource "aws_security_group" "quortex_private" {
     }
   }
 
-  dynamic "ingress" {  
-    for_each = var.load_balancer_private_expose_http ? [true]: []
+  dynamic "ingress" {
+    for_each = var.load_balancer_private_expose_http ? [true] : []
     content {
       description = "Allow simple HTTP from whitelisted ip ranges only"
       from_port   = 80

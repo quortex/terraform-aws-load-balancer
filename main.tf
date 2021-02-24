@@ -14,15 +14,8 @@
  * limitations under the License.
  */
 
-# AWS provider configuration
-# version constraints defined in versions.tf
-provider "aws" {
-  region = var.region
-}
-
 # Additionnal provider configuration for N. Virginia
-# Used to create a certificate in the "us-east-1" region (a certificate in this region is required by CloudFront)
+# Used to create cloudfront related resources (a certificate in the "us-east-1" region is required by CloudFront)
 provider "aws" {
-  region = "us-east-1"
-  alias = "us-east-1"
+  alias  = "us-east-1"
 }
