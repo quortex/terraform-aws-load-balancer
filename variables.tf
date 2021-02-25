@@ -74,11 +74,6 @@ variable "cdn_ssl_certificate_name" {
   default     = ""
 }
 
-variable "region" {
-  type        = string
-  description = "The region in wich to create load balancers."
-}
-
 variable "vpc_id" {
   type        = string
   description = "ID of the VPC in which the ALB should be."
@@ -211,7 +206,7 @@ variable "cdn_ssl_certificate_arn" {
 }
 
 variable "tags" {
-  type        = map
+  type        = map(any)
   description = "The tags (a map of key/value pairs) to be applied to created resources."
   default     = {}
 }

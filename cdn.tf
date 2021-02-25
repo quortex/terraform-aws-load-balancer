@@ -16,7 +16,7 @@
 
 
 locals {
-  cdn_domain_name = var.cdn_dns_record != null ? "${var.cdn_dns_record}.${trimsuffix(data.aws_route53_zone.selected[0].name, ".")}" : null
+  cdn_domain_name    = var.cdn_dns_record != null ? "${var.cdn_dns_record}.${trimsuffix(data.aws_route53_zone.selected[0].name, ".")}" : null
   origin_domain_name = var.cdn_origin != null ? "${var.dns_records_public[var.cdn_origin]}.${trimsuffix(data.aws_route53_zone.selected[0].name, ".")}" : aws_lb.quortex_public.dns_name
 }
 
