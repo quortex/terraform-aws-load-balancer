@@ -106,6 +106,12 @@ variable "load_balancer_public_expose_https" {
   description = "Set to true if the HTTPS port 443 should be exposed (for the public load balancer)"
 }
 
+variable "load_balancer_public_redirect_http_to_https" {
+  type        = bool
+  default     = true
+  description = "Set to true if the HTTP port 80 should redirect to HTTPS (for the public load balancer)"
+}
+
 variable "load_balancer_private_expose_http" {
   type        = bool
   default     = true
@@ -116,6 +122,12 @@ variable "load_balancer_private_expose_https" {
   type        = bool
   default     = true
   description = "Set to true if the HTTPS port 443 should be exposed (for the private load balancer)"
+}
+
+variable "load_balancer_private_redirect_http_to_https" {
+  type        = bool
+  default     = true
+  description = "Set to true if the HTTP port 80 should redirect to HTTPS (for the private load balancer)"
 }
 
 variable "load_balancer_public_app_backend_ports" {

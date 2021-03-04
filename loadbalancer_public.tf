@@ -178,8 +178,26 @@ resource "aws_lb_listener" "quortex_public_http" {
   load_balancer_arn = aws_lb.quortex_public.arn
   port              = "80"
   protocol          = "HTTP"
-  default_action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.quortex_public[count.index].arn
+
+  dynamic "default_action" {
+    for_each = var.load_balancer_public_redirect_http_to_https ? [1] : []
+
+    content {
+      type = "redirect"
+      redirect {
+        port        = "443"
+        protocol    = "HTTPS"
+        status_code = "HTTP_301"
+      }
+    }
+  }
+
+  dynamic "default_action" {
+    for_each = var.load_balancer_public_redirect_http_to_https ? [] : [1]
+
+    content {
+      type             = "forward"
+      target_group_arn = aws_lb_target_group.quortex_public[count.index].arn
+    }
   }
 }
