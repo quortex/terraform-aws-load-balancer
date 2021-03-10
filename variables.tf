@@ -112,6 +112,12 @@ variable "load_balancer_public_redirect_http_to_https" {
   description = "Set to true if the HTTP port 80 should redirect to HTTPS (for the public load balancer)"
 }
 
+variable "load_balancer_public_additional_certs_arns" {
+  type        = set(string)
+  default     = []
+  description = "A list of ARNs for public loadbalancer HTTPS listener additional certificates."
+}
+
 variable "load_balancer_private_expose_http" {
   type        = bool
   default     = true
@@ -128,6 +134,12 @@ variable "load_balancer_private_redirect_http_to_https" {
   type        = bool
   default     = true
   description = "Set to true if the HTTP port 80 should redirect to HTTPS (for the private load balancer)"
+}
+
+variable "load_balancer_private_additional_certs_arns" {
+  type        = set(string)
+  default     = []
+  description = "A list of ARNs for private loadbalancer HTTPS listener additional certificates."
 }
 
 variable "load_balancer_public_app_backend_ports" {

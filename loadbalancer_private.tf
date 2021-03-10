@@ -159,6 +159,15 @@ resource "aws_lb_listener" "quortex_private_tls" {
   }
 }
 
+# Provides Load Balancer Listener Certificate resources.
+# These resources are for additional certificates and does not replace the default certificate on the listener.
+resource "aws_lb_listener_certificate" "quortex_private" {
+  for_each = var.load_balancer_private_expose_https ? (length(var.load_balancer_private_app_backend_ports) > 0 ? var.load_balancer_private_additional_certs_arns : []) : []
+
+  listener_arn    = aws_lb_listener.quortex_private_tls[0].arn
+  certificate_arn = each.value
+}
+
 # HTTP listener (80)
 resource "aws_lb_listener" "quortex_private_http" {
   # This listener forwards traffic as-is to the target
