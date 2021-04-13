@@ -36,23 +36,28 @@ resource "aws_acm_certificate" "cert_cdn" {
   }
 }
 
+locals {
+  # Convert to a map, referenced by the certificate's ARN
+  certs_cdn = { for c in aws_acm_certificate.cert_cdn : c.arn => c }
+}
+
 # DNS record to validate this certificate
 resource "aws_route53_record" "cert_validation_cdn" {
-  count = (var.cdn_create_distribution && var.cdn_ssl_certificate_arn == null && var.cdn_dns_record != null) ? 1 : 0
+  for_each = local.certs_cdn
 
   provider = aws.us-east-1 # the certificate used in CloudFront CDN has to be located in th "us-east-1" (N. Virginia) region
-  name     = tolist(aws_acm_certificate.cert_cdn[0].domain_validation_options)[0].resource_record_name
-  type     = tolist(aws_acm_certificate.cert_cdn[0].domain_validation_options)[0].resource_record_type
+  name     = tolist(each.value.domain_validation_options)[0].resource_record_name
+  type     = tolist(each.value.domain_validation_options)[0].resource_record_type
   zone_id  = data.aws_route53_zone.selected[0].zone_id
-  records  = [tolist(aws_acm_certificate.cert_cdn[0].domain_validation_options)[0].resource_record_value]
+  records  = [tolist(each.value.domain_validation_options)[0].resource_record_value]
   ttl      = 60
 }
 
 # Certificate validation
 resource "aws_acm_certificate_validation" "cert_cdn" {
-  count = (var.cdn_create_distribution && var.cdn_ssl_certificate_arn == null) ? 1 : 0
+  for_each = local.certs_cdn
 
   provider                = aws.us-east-1 # the certificate used in CloudFront CDN has to be located in th "us-east-1" (N. Virginia) region
-  certificate_arn         = aws_acm_certificate.cert_cdn[0].arn
-  validation_record_fqdns = [aws_route53_record.cert_validation_cdn[0].fqdn]
+  certificate_arn         = tolist(aws_acm_certificate.cert_cdn)[0].arn
+  validation_record_fqdns = [aws_route53_record.cert_validation_cdn[each.key].fqdn]
 }

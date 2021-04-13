@@ -102,7 +102,7 @@ resource "aws_cloudfront_distribution" "lb_distribution" {
 
   # TLS configuration
   viewer_certificate {
-    acm_certificate_arn            = var.cdn_ssl_certificate_arn != null ? var.cdn_ssl_certificate_arn : aws_acm_certificate_validation.cert_cdn[0].certificate_arn
+    acm_certificate_arn            = var.cdn_ssl_certificate_arn != null ? var.cdn_ssl_certificate_arn : values(aws_acm_certificate_validation.cert_cdn)[0].certificate_arn
     cloudfront_default_certificate = false
     minimum_protocol_version       = "TLSv1.2_2019"
     ssl_support_method             = "sni-only"

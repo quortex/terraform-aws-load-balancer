@@ -38,21 +38,26 @@ resource "aws_acm_certificate" "cert" {
   }
 }
 
+locals {
+  # Convert to a map, referenced by the certificate's ARN
+  certs = { for c in aws_acm_certificate.cert : c.arn => c }
+}
+
 # DNS record to validate this certificate
 resource "aws_route53_record" "cert_validation" {
-  count = var.ssl_certificate_arn == null ? 1 : 0
+  for_each = local.certs
 
-  name    = tolist(aws_acm_certificate.cert[0].domain_validation_options)[0].resource_record_name
-  type    = tolist(aws_acm_certificate.cert[0].domain_validation_options)[0].resource_record_type
+  name    = tolist(each.value.domain_validation_options)[0].resource_record_name
+  type    = tolist(each.value.domain_validation_options)[0].resource_record_type
   zone_id = data.aws_route53_zone.selected[0].zone_id
-  records = [tolist(aws_acm_certificate.cert[0].domain_validation_options)[0].resource_record_value]
+  records = [tolist(each.value.domain_validation_options)[0].resource_record_value]
   ttl     = 60
 }
 
 # Certificate validation
 resource "aws_acm_certificate_validation" "cert" {
-  count = var.ssl_certificate_arn == null ? 1 : 0
+  for_each = local.certs
 
-  certificate_arn         = aws_acm_certificate.cert[0].arn
-  validation_record_fqdns = [aws_route53_record.cert_validation[0].fqdn]
+  certificate_arn         = each.value.arn
+  validation_record_fqdns = [aws_route53_record.cert_validation[each.key].fqdn]
 }
