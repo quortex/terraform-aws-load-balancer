@@ -145,7 +145,7 @@ resource "aws_lb_listener" "quortex_private_tls" {
   # Configured with the certificate created in the ACM service
 
   # No listener will be created (yet) if the target port is not defined
-  count = var.load_balancer_private_expose_https ? (length(var.load_balancer_private_app_backend_ports) > 0 ? 1 : 0) : 0
+  count = var.load_balancer_private_expose_https && length(var.load_balancer_private_app_backend_ports) > 0 ? 1 : 0
 
   load_balancer_arn = aws_lb.quortex_private.arn
   port              = "443"
@@ -159,12 +159,21 @@ resource "aws_lb_listener" "quortex_private_tls" {
   }
 }
 
+# Provides Load Balancer Listener Certificate resources.
+# These resources are for additional certificates and does not replace the default certificate on the listener.
+resource "aws_lb_listener_certificate" "quortex_private" {
+  for_each = var.load_balancer_private_expose_https && length(var.load_balancer_private_app_backend_ports) > 0 ? var.load_balancer_private_additional_certs_arns : []
+
+  listener_arn    = aws_lb_listener.quortex_private_tls[0].arn
+  certificate_arn = each.value
+}
+
 # HTTP listener (80)
 resource "aws_lb_listener" "quortex_private_http" {
   # This listener forwards traffic as-is to the target
 
   # No listener will be created (yet) if the no port is defined
-  count = var.load_balancer_private_expose_http ? (length(var.load_balancer_private_app_backend_ports) > 0 ? 1 : 0) : 0
+  count = var.load_balancer_private_expose_http && length(var.load_balancer_private_app_backend_ports) > 0 ? 1 : 0
 
   load_balancer_arn = aws_lb.quortex_private.arn
   port              = "80"
