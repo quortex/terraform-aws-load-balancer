@@ -98,6 +98,14 @@ An additional DNS record can be created for the CDN distribution.
 
 The certificate for the CDN is created in AWS Certificate Manager (or an existing and validated certificate ARN can be provided), and it includes the domain name created for the CDN distribution. This certificate is located in the N. Virginia region (required by AWS).
 
+
+---
+
+## Upgrading
+
+When upgrading an existing infrastructure from 1.6.0 to 1.7.0, the script migrate_terraform_security_group_rules.sh should be used to seamlessly migrate from inline security group rules to separate rule resources.
+
+
 ---
 
 ## Related Projects
