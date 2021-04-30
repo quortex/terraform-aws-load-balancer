@@ -27,47 +27,56 @@
 # autoscaling group. 
 
 
+locals {
+  private_lb_allowed_ip_ranges = toset(var.load_balancer_private_whitelisted_ips)
+}
+
 # Security group
 resource "aws_security_group" "quortex_private" {
   name        = local.private_lb_security_group_name
   description = "Security group for the private ALB"
-
-  vpc_id = var.vpc_id
-
-  dynamic "ingress" {
-    for_each = var.load_balancer_private_expose_https ? [true] : []
-    content {
-      description = "Allow TLS HTTP from whitelisted ip ranges only"
-      from_port   = 443
-      to_port     = 443
-      protocol    = "tcp"
-      cidr_blocks = var.load_balancer_private_whitelisted_ips
-    }
-  }
-
-  dynamic "ingress" {
-    for_each = var.load_balancer_private_expose_http ? [true] : []
-    content {
-      description = "Allow simple HTTP from whitelisted ip ranges only"
-      from_port   = 80
-      to_port     = 80
-      protocol    = "tcp"
-      cidr_blocks = var.load_balancer_private_whitelisted_ips
-    }
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+  vpc_id      = var.vpc_id
 
   tags = merge({
     Name = local.private_lb_security_group_name
     },
     var.tags
   )
+}
+
+resource "aws_security_group_rule" "lb_private_http" {
+  for_each = var.load_balancer_private_expose_http ? local.private_lb_allowed_ip_ranges : []
+
+  description       = "Allow simple HTTP from whitelisted ip ranges only"
+  type              = "ingress"
+  from_port         = 80
+  to_port           = 80
+  protocol          = "tcp"
+  cidr_blocks       = [each.value]
+  security_group_id = aws_security_group.quortex_private.id
+}
+
+resource "aws_security_group_rule" "lb_private_https" {
+  for_each = var.load_balancer_private_expose_https ? local.private_lb_allowed_ip_ranges : []
+
+  description       = "Allow TLS HTTP from whitelisted ip ranges only"
+  type              = "ingress"
+  from_port         = 443
+  to_port           = 443
+  protocol          = "tcp"
+  cidr_blocks       = [each.value]
+  security_group_id = aws_security_group.quortex_private.id
+  source_security_group_id = null
+}
+
+resource "aws_security_group_rule" "lb_private_egress" {
+  description       = "Allow all traffic out"
+  type              = "egress"
+  from_port         = 0
+  to_port           = 0
+  protocol          = "-1"
+  cidr_blocks       = ["0.0.0.0/0"]
+  security_group_id = aws_security_group.quortex_private.id
 }
 
 # Load balancer (ALB)

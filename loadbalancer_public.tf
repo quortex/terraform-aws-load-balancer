@@ -33,44 +33,15 @@ data "aws_ip_ranges" "cloudfront" {
 
 locals {
   # Important note: the default quota for "Inbound or outbound rules per security group" is 60, it is not sufficient to fit all the Cloudfront IP ranges. This quota should be increased in the region used.
-  public_lb_allowed_ip_ranges = var.load_balancer_public_restrict_access ? concat(var.cdn_create_distribution ? data.aws_ip_ranges.cloudfront.cidr_blocks : [], var.load_balancer_public_whitelisted_ips) : ["0.0.0.0/0"]
+  cdn_whitelist               = var.cdn_create_distribution ? data.aws_ip_ranges.cloudfront.cidr_blocks : []
+  public_lb_allowed_ip_ranges = toset(var.load_balancer_public_restrict_access ? concat(local.cdn_whitelist, var.load_balancer_public_whitelisted_ips) : ["0.0.0.0/0"])
 }
 
 # Security group
 resource "aws_security_group" "quortex_public" {
   name        = local.public_lb_security_group_name
   description = "Security group for the public ALB"
-
-  vpc_id = var.vpc_id
-
-  dynamic "ingress" {
-    for_each = var.load_balancer_public_expose_https ? [true] : []
-    content {
-      description = "Allow TLS HTTP"
-      from_port   = 443
-      to_port     = 443
-      protocol    = "tcp"
-      cidr_blocks = local.public_lb_allowed_ip_ranges
-    }
-  }
-
-  dynamic "ingress" {
-    for_each = var.load_balancer_public_expose_http ? [true] : []
-    content {
-      description = "Allow simple HTTP"
-      from_port   = 80
-      to_port     = 80
-      protocol    = "tcp"
-      cidr_blocks = local.public_lb_allowed_ip_ranges
-    }
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+  vpc_id      = var.vpc_id
 
   tags = merge({
     Name = local.public_lb_security_group_name
@@ -78,6 +49,42 @@ resource "aws_security_group" "quortex_public" {
     var.tags
   )
 }
+
+# Security group rules
+resource "aws_security_group_rule" "lb_public_http" {
+  for_each = var.load_balancer_public_expose_http ? local.public_lb_allowed_ip_ranges : []
+
+  description       = "Allow simple HTTP from whitelisted ip ranges only"
+  type              = "ingress"
+  from_port         = 80
+  to_port           = 80
+  protocol          = "tcp"
+  cidr_blocks       = [each.value]
+  security_group_id = aws_security_group.quortex_public.id
+}
+
+resource "aws_security_group_rule" "lb_public_https" {
+  for_each = var.load_balancer_public_expose_https ? local.public_lb_allowed_ip_ranges : []
+
+  description       = "Allow TLS HTTP from whitelisted ip ranges only"
+  type              = "ingress"
+  from_port         = 443
+  to_port           = 443
+  protocol          = "tcp"
+  cidr_blocks       = [each.value]
+  security_group_id = aws_security_group.quortex_public.id
+}
+
+resource "aws_security_group_rule" "lb_public_egress" {
+  description       = "Allow all traffic out"
+  type              = "egress"
+  from_port         = 0
+  to_port           = 0
+  protocol          = "all"
+  cidr_blocks       = ["0.0.0.0/0"]
+  security_group_id = aws_security_group.quortex_public.id
+}
+
 
 # Load balancer (ALB)
 resource "aws_lb" "quortex_public" {
