@@ -53,9 +53,10 @@ terraform plan -out="${tf_plan}" ${TERRAFORM_ARGS[@]}
 planned_rules=`terraform show -json ${tf_plan} | jq -c -r ".planned_values.root_module.child_modules[] | .resources[] | select(.type==\"aws_security_group_rule\")"`
 
 # Read security groups from current Terraform state
-terraform show -json \
-| jq -c -r ".values.root_module.child_modules[] | .resources[] | select(.type==\"aws_security_group\")" \
-| while read -r security_group; 
+current_security_groups_json_file=$(mktemp)
+echo "current_security_groups_json_file: $current_security_groups_json_file"
+terraform show -json | jq -c -r ".values.root_module.child_modules[] | .resources[] | select(.type==\"aws_security_group\")" > "${current_security_groups_json_file}"
+while read -r security_group;
     do 
         sg_id=`echo $security_group | jq -r '.values.id'`
         echo "security group $(echo $security_group | jq -c '{address: .address, id: .values.id}')"
@@ -73,6 +74,7 @@ terraform show -json \
                 fi
 
                 # Find an "aws_security_group_rule" resource (from terraform plan) that matches this rule
+                echo "Importing ingress rule ${rule}..."
                 rule_resource_json=$(echo "$planned_rules" | jq -c -r --argjson rule_var "$rule" "select(.values.security_group_id==\"$sg_id\" and .values.type==\"ingress\") | select(.values|contains(\$rule_var))")
                 if [ -z "$rule_resource_json" ]
                 then
@@ -105,6 +107,7 @@ terraform show -json \
                 fi
 
                 # Find an "aws_security_group_rule" resource (from terraform plan) that matches this rule
+                echo "Importing egress rule ${rule}..."
                 rule_resource_json=$(echo "$planned_rules" | jq -c -r --argjson rule_var "$rule" "select(.values.security_group_id==\"$sg_id\" and .values.type==\"egress\") | select(.values|contains(\$rule_var))")
                 if [ -z "$rule_resource_json" ]
                 then
@@ -125,7 +128,7 @@ terraform show -json \
             done 
 
         echo ""
-    done
+    done < ${current_security_groups_json_file}
 
 if [ "$INFO_ONLY" == "true" ]
 then
