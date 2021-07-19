@@ -15,12 +15,12 @@
  */
 
 output "public_lb_target_group_arns" {
-  value       = aws_lb_target_group.quortex_public[*].arn
+  value       = try(aws_lb_target_group.quortex_public[*].arn, [])
   description = "The ARN of the target groups that instances should be attached to. Once the load balancer and its target groups are created, instances that can listen must be attached to these groups."
 }
 
 output "private_lb_target_group_arns" {
-  value       = aws_lb_target_group.quortex_public[*].arn
+  value       = try(aws_lb_target_group.quortex_public[*].arn, [])
   description = "The ARN of the target groups that instances should be attached to. Once the load balancer and its target groups are created, instances that can listen must be attached to these groups."
 }
 
