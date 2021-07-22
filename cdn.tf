@@ -132,9 +132,10 @@ resource "aws_cloudfront_distribution" "lb_distribution" {
 resource "aws_route53_record" "quortex_cdn" {
   count = (var.cdn_create_distribution && var.cdn_dns_record != null) ? 1 : 0
 
-  zone_id = data.aws_route53_zone.selected[0].zone_id
-  name    = var.cdn_dns_record
-  type    = "A"
+  provider = aws.dns
+  zone_id  = data.aws_route53_zone.selected[0].zone_id
+  name     = var.cdn_dns_record
+  type     = "A"
 
   alias {
     name                   = aws_cloudfront_distribution.lb_distribution[0].domain_name

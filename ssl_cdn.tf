@@ -40,7 +40,7 @@ resource "aws_acm_certificate" "cert_cdn" {
 resource "aws_route53_record" "cert_validation_cdn" {
   count = (var.cdn_create_distribution && var.cdn_ssl_certificate_arn == null && var.cdn_dns_record != null) ? 1 : 0
 
-  provider = aws.us-east-1 # the certificate used in CloudFront CDN has to be located in th "us-east-1" (N. Virginia) region
+  provider = aws.dns # the certificate used in CloudFront CDN has to be located in th "us-east-1" (N. Virginia) region
   name     = tolist(aws_acm_certificate.cert_cdn[0].domain_validation_options).0.resource_record_name
   type     = tolist(aws_acm_certificate.cert_cdn[0].domain_validation_options).0.resource_record_type
   zone_id  = data.aws_route53_zone.selected[0].zone_id
