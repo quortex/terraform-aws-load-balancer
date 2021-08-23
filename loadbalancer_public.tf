@@ -15,16 +15,16 @@
  */
 
 
-# There are 3 types of load balancers in AWS: 
+# There are 3 types of load balancers in AWS:
 # - Classic
 # - NLB (Network Load Balancer)
 # - ALB (Application Load Balancer)
 #
 # Here an Application Load Balancer is created.
-# It listens for HTTP and HTTPS, and forwards HTTPS to instances of the 
+# It listens for HTTP and HTTPS, and forwards HTTPS to instances of the
 # target group.
 # The target group is made of instances, which are the instances of the
-# autoscaling group. 
+# autoscaling group.
 
 data "aws_ip_ranges" "cloudfront" {
   regions  = ["global"]
@@ -52,26 +52,26 @@ resource "aws_security_group" "quortex_public" {
 
 # Security group rules
 resource "aws_security_group_rule" "lb_public_http" {
-  for_each = var.load_balancer_public_expose_http ? local.public_lb_allowed_ip_ranges : []
+  #for_each = var.load_balancer_public_expose_http ? local.public_lb_allowed_ip_ranges : []
 
   description       = "Allow simple HTTP from whitelisted ip ranges only"
   type              = "ingress"
   from_port         = 80
   to_port           = 80
   protocol          = "tcp"
-  cidr_blocks       = [each.value]
+  cidr_blocks       = var.load_balancer_public_expose_https ? local.public_lb_allowed_ip_ranges : []
   security_group_id = aws_security_group.quortex_public.id
 }
 
 resource "aws_security_group_rule" "lb_public_https" {
-  for_each = var.load_balancer_public_expose_https ? local.public_lb_allowed_ip_ranges : []
+  #for_each = var.load_balancer_public_expose_https ? local.public_lb_allowed_ip_ranges : []
 
   description       = "Allow TLS HTTP from whitelisted ip ranges only"
   type              = "ingress"
   from_port         = 443
   to_port           = 443
   protocol          = "tcp"
-  cidr_blocks       = [each.value]
+  cidr_blocks       = var.load_balancer_public_expose_https ? local.public_lb_allowed_ip_ranges : []
   security_group_id = aws_security_group.quortex_public.id
 }
 
@@ -107,7 +107,7 @@ resource "aws_lb" "quortex_public" {
 
 # Target group of the ALB (type IP)
 resource "aws_lb_target_group" "quortex_public" {
-  # Instances can be attached to this group automatically by specifying 
+  # Instances can be attached to this group automatically by specifying
   # this group id in an autoscaling group.
 
   # No target group will be created (yet) if the target port is not defined
