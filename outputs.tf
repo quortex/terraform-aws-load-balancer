@@ -43,3 +43,8 @@ output "cdn_distribution_id" {
   value       = length(aws_cloudfront_distribution.lb_distribution) != 0 ? aws_cloudfront_distribution.lb_distribution[0].id : null
   description = "The ID of the CloudFront distribution, if enabled"
 }
+
+output "lb_public_sg_id" {
+  value       = aws_security_group.quortex_public.id
+  description = "ID of the Security Group attached to the public load balancer."
+}
