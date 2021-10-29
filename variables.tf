@@ -170,6 +170,12 @@ variable "load_balancer_public_whitelisted_ips" {
   default     = []
 }
 
+variable "load_balancer_public_allow_origin_shield_range" {
+  type        = bool
+  description = "Should Origin Shield IP range be allowed on ingress on public LB."
+  default     = false
+}
+
 variable "load_balancer_autoscaling_group_names" {
   type        = list(string)
   description = "The name of the autoscaling groups containing the target instances, so that instances can be attached to the load balancer's target group."

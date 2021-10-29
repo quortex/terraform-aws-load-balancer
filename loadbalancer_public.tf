@@ -15,26 +15,33 @@
  */
 
 
-# There are 3 types of load balancers in AWS: 
+# There are 3 types of load balancers in AWS:
 # - Classic
 # - NLB (Network Load Balancer)
 # - ALB (Application Load Balancer)
 #
 # Here an Application Load Balancer is created.
-# It listens for HTTP and HTTPS, and forwards HTTPS to instances of the 
+# It listens for HTTP and HTTPS, and forwards HTTPS to instances of the
 # target group.
 # The target group is made of instances, which are the instances of the
-# autoscaling group. 
+# autoscaling group.
 
 data "aws_ip_ranges" "cloudfront" {
   regions  = ["global"]
   services = ["cloudfront"]
 }
 
+data "aws_ip_ranges" "cloudfront_origin_shield" {
+  services = ["cloudfront_origin_facing"]
+}
+
 locals {
   # Important note: the default quota for "Inbound or outbound rules per security group" is 60, it is not sufficient to fit all the Cloudfront IP ranges. This quota should be increased in the region used.
   cdn_whitelist               = var.cdn_create_distribution ? data.aws_ip_ranges.cloudfront.cidr_blocks : []
-  public_lb_allowed_ip_ranges = toset(var.load_balancer_public_restrict_access ? concat(local.cdn_whitelist, var.load_balancer_public_whitelisted_ips) : ["0.0.0.0/0"])
+  public_lb_allowed_ip_ranges = toset(var.load_balancer_public_restrict_access ? concat(local.cdn_whitelist, local.public_lb_allowed_ip_ranges_shield, var.load_balancer_public_whitelisted_ips) : ["0.0.0.0/0"])
+  # This is adding (as of today) ~44 new ranges, so SG final size is ~ 170 rules.
+  public_lb_allowed_ip_ranges_shield = var.load_balancer_public_allow_origin_shield_range ? data.aws_ip_ranges.cloudfront_origin_shield.cidr_blocks : []
+
 }
 
 # Security group
@@ -85,7 +92,6 @@ resource "aws_security_group_rule" "lb_public_egress" {
   security_group_id = aws_security_group.quortex_public.id
 }
 
-
 # Load balancer (ALB)
 resource "aws_lb" "quortex_public" {
   name = local.public_lb_name
@@ -107,7 +113,7 @@ resource "aws_lb" "quortex_public" {
 
 # Target group of the ALB (type IP)
 resource "aws_lb_target_group" "quortex_public" {
-  # Instances can be attached to this group automatically by specifying 
+  # Instances can be attached to this group automatically by specifying
   # this group id in an autoscaling group.
 
   # No target group will be created (yet) if the target port is not defined
