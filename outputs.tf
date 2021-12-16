@@ -48,3 +48,13 @@ output "lb_public_sg_id" {
   value       = aws_security_group.quortex_public.id
   description = "ID of the Security Group attached to the public load balancer."
 }
+
+output "ssl_certificate_cdn_arn" {
+  value       = try(aws_acm_certificate.cert_cdn.0.arn, "")
+  description = "ARN of the created CDN SSL certificate."
+}
+
+output "ssl_certificate_arn" {
+  value       = try(aws_acm_certificate.cert.0.arn, "")
+  description = "ARN of the created SSL certificate."
+}
