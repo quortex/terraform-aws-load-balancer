@@ -52,8 +52,8 @@ resource "aws_route53_record" "quortex_private" {
   type    = "A"
 
   alias {
-    name                   = aws_lb.quortex_private.dns_name
-    zone_id                = aws_lb.quortex_private.zone_id
+    name                   = aws_lb.quortex_private[0].dns_name
+    zone_id                = aws_lb.quortex_private[0].zone_id
     evaluate_target_health = false
   }
 }
