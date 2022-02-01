@@ -15,16 +15,16 @@
  */
 
 
-# There are 3 types of load balancers in AWS: 
+# There are 3 types of load balancers in AWS:
 # - Classic
 # - NLB (Network Load Balancer)
 # - ALB (Application Load Balancer)
 #
 # Here an Application Load Balancer is created.
-# It listens for HTTP and HTTPS, and forwards HTTPS to instances of the 
+# It listens for HTTP and HTTPS, and forwards HTTPS to instances of the
 # target group.
 # The target group is made of instances, which are the instances of the
-# autoscaling group. 
+# autoscaling group.
 
 
 locals {
@@ -33,6 +33,8 @@ locals {
 
 # Security group
 resource "aws_security_group" "quortex_private" {
+  count = length(var.load_balancer_private_app_backend_ports) > 0 ? 1 : 0
+
   name        = local.private_lb_security_group_name
   description = "Security group for the private ALB"
   vpc_id      = var.vpc_id
@@ -45,7 +47,7 @@ resource "aws_security_group" "quortex_private" {
 }
 
 resource "aws_security_group_rule" "lb_private_http" {
-  for_each = var.load_balancer_private_expose_http ? local.private_lb_allowed_ip_ranges : []
+  for_each = var.load_balancer_private_expose_http && length(var.load_balancer_private_app_backend_ports) > 0 ? local.private_lb_allowed_ip_ranges : []
 
   description       = "Allow simple HTTP from whitelisted ip ranges only"
   type              = "ingress"
@@ -53,39 +55,43 @@ resource "aws_security_group_rule" "lb_private_http" {
   to_port           = 80
   protocol          = "tcp"
   cidr_blocks       = [each.value]
-  security_group_id = aws_security_group.quortex_private.id
+  security_group_id = aws_security_group.quortex_private[0].id
 }
 
 resource "aws_security_group_rule" "lb_private_https" {
-  for_each = var.load_balancer_private_expose_https ? local.private_lb_allowed_ip_ranges : []
+  for_each = var.load_balancer_private_expose_https && length(var.load_balancer_private_app_backend_ports) > 0 ? local.private_lb_allowed_ip_ranges : []
 
-  description       = "Allow TLS HTTP from whitelisted ip ranges only"
-  type              = "ingress"
-  from_port         = 443
-  to_port           = 443
-  protocol          = "tcp"
-  cidr_blocks       = [each.value]
-  security_group_id = aws_security_group.quortex_private.id
+  description              = "Allow TLS HTTP from whitelisted ip ranges only"
+  type                     = "ingress"
+  from_port                = 443
+  to_port                  = 443
+  protocol                 = "tcp"
+  cidr_blocks              = [each.value]
+  security_group_id        = aws_security_group.quortex_private[0].id
   source_security_group_id = null
 }
 
 resource "aws_security_group_rule" "lb_private_egress" {
+  count = length(var.load_balancer_private_app_backend_ports) > 0 ? 1 : 0
+
   description       = "Allow all traffic out"
   type              = "egress"
   from_port         = 0
   to_port           = 0
   protocol          = "-1"
   cidr_blocks       = ["0.0.0.0/0"]
-  security_group_id = aws_security_group.quortex_private.id
+  security_group_id = aws_security_group.quortex_private[0].id
 }
 
 # Load balancer (ALB)
 resource "aws_lb" "quortex_private" {
+  count = length(var.load_balancer_private_app_backend_ports) > 0 ? 1 : 0
+
   name = local.private_lb_name
 
   internal           = false
   load_balancer_type = "application"
-  security_groups    = [aws_security_group.quortex_private.id]
+  security_groups    = [aws_security_group.quortex_private[0].id]
   subnets            = var.subnet_ids
 
   # Advanced parameters
@@ -100,7 +106,7 @@ resource "aws_lb" "quortex_private" {
 
 # Target group of the ALB (type IP)
 resource "aws_lb_target_group" "quortex_private" {
-  # Instances can be attached to this group automatically by specifying 
+  # Instances can be attached to this group automatically by specifying
   # this group id in an autoscaling group.
 
   # No target group will be created (yet) if the target port is not defined
@@ -156,7 +162,7 @@ resource "aws_lb_listener" "quortex_private_tls" {
   # No listener will be created (yet) if the target port is not defined
   count = var.load_balancer_private_expose_https && length(var.load_balancer_private_app_backend_ports) > 0 ? 1 : 0
 
-  load_balancer_arn = aws_lb.quortex_private.arn
+  load_balancer_arn = aws_lb.quortex_private[0].arn
   port              = "443"
   protocol          = "HTTPS"
   ssl_policy        = var.private_lb_ssl_policy
@@ -184,7 +190,7 @@ resource "aws_lb_listener" "quortex_private_http" {
   # No listener will be created (yet) if the no port is defined
   count = var.load_balancer_private_expose_http && length(var.load_balancer_private_app_backend_ports) > 0 ? 1 : 0
 
-  load_balancer_arn = aws_lb.quortex_private.arn
+  load_balancer_arn = aws_lb.quortex_private[0].arn
   port              = "80"
   protocol          = "HTTP"
 
