@@ -33,6 +33,8 @@ locals {
 
 # Security group
 resource "aws_security_group" "quortex_private" {
+  count = length(var.load_balancer_private_app_backend_ports) > 0 ? 1 : 0
+
   name        = local.private_lb_security_group_name
   description = "Security group for the private ALB"
   vpc_id      = var.vpc_id
@@ -45,7 +47,7 @@ resource "aws_security_group" "quortex_private" {
 }
 
 resource "aws_security_group_rule" "lb_private_http" {
-  for_each = var.load_balancer_private_expose_http ? local.private_lb_allowed_ip_ranges : []
+  for_each = var.load_balancer_private_expose_http && (length(var.load_balancer_private_app_backend_ports) > 0) ? local.private_lb_allowed_ip_ranges : []
 
   description       = "Allow simple HTTP from whitelisted ip ranges only"
   type              = "ingress"
@@ -57,7 +59,7 @@ resource "aws_security_group_rule" "lb_private_http" {
 }
 
 resource "aws_security_group_rule" "lb_private_https" {
-  for_each = var.load_balancer_private_expose_https ? local.private_lb_allowed_ip_ranges : []
+  for_each = var.load_balancer_private_expose_https && (length(var.load_balancer_private_app_backend_ports) > 0) ? local.private_lb_allowed_ip_ranges : []
 
   description       = "Allow TLS HTTP from whitelisted ip ranges only"
   type              = "ingress"
@@ -70,6 +72,8 @@ resource "aws_security_group_rule" "lb_private_https" {
 }
 
 resource "aws_security_group_rule" "lb_private_egress" {
+  count = length(var.load_balancer_private_app_backend_ports) > 0 ? 1 : 0
+
   description       = "Allow all traffic out"
   type              = "egress"
   from_port         = 0
@@ -81,6 +85,8 @@ resource "aws_security_group_rule" "lb_private_egress" {
 
 # Load balancer (ALB)
 resource "aws_lb" "quortex_private" {
+  count = length(var.load_balancer_private_app_backend_ports) > 0 ? 1 : 0
+
   name = local.private_lb_name
 
   internal           = false
