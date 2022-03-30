@@ -19,9 +19,29 @@ output "public_lb_target_group_arns" {
   description = "The ARN of the target groups that instances should be attached to. Once the load balancer and its target groups are created, instances that can listen must be attached to these groups."
 }
 
+output "public_lb_http_listener" {
+  value       = try(aws_lb_listener.quortex_public_http.0.arn, null)
+  description = "The HTTP listener arn of the public load balancer."
+}
+
+output "public_lb_tls_listener" {
+  value       = try(aws_lb_listener.quortex_public_tls.0.arn, null)
+  description = "The TLS listener arn of the public load balancer."
+}
+
 output "private_lb_target_group_arns" {
   value       = aws_lb_target_group.quortex_public[*].arn
   description = "The ARN of the target groups that instances should be attached to. Once the load balancer and its target groups are created, instances that can listen must be attached to these groups."
+}
+
+output "private_lb_http_listener" {
+  value       = try(aws_lb_listener.quortex_private_http.0.arn, null)
+  description = "The HTTP listener arn of the private load balancer."
+}
+
+output "private_lb_tls_listener" {
+  value       = try(aws_lb_listener.quortex_private_tls.0.arn, null)
+  description = "The TLS listener arn of the private load balancer."
 }
 
 output "dns_records_public" {

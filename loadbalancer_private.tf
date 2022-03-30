@@ -109,14 +109,14 @@ resource "aws_lb_target_group" "quortex_private" {
   # Instances can be attached to this group automatically by specifying
   # this group id in an autoscaling group.
 
-  # No target group will be created (yet) if the target port is not defined
-  count = length(var.load_balancer_private_app_backend_ports) > 0 ? 1 : 0
+  # No target group will be created if the target port is not defined
+  count = length(var.load_balancer_private_app_backend_ports)
 
   vpc_id = var.vpc_id
 
   target_type = "instance"
   protocol    = "HTTP"
-  port        = var.load_balancer_private_app_backend_ports[0]
+  port        = var.load_balancer_private_app_backend_ports[count.index]
 
   deregistration_delay          = var.private_lb_deregistration_delay
   slow_start                    = var.private_lb_slow_start
