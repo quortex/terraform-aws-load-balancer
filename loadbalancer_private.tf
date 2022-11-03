@@ -132,7 +132,7 @@ resource "aws_lb_target_group" "quortex_private" {
     enabled             = var.private_lb_health_check_enabled
     interval            = var.private_lb_health_check_interval
     path                = var.private_lb_health_check_path
-    port                = var.private_lb_health_check_port
+    port                = length(var.private_lb_health_check_ports) > 0 ? var.private_lb_health_check_ports[count.index] : var.private_lb_health_check_port
     protocol            = var.private_lb_health_check_protocol
     timeout             = var.private_lb_health_check_timeout
     healthy_threshold   = var.private_lb_health_check_healthy_threshold

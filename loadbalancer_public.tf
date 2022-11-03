@@ -15,16 +15,16 @@
  */
 
 
-# There are 3 types of load balancers in AWS: 
+# There are 3 types of load balancers in AWS:
 # - Classic
 # - NLB (Network Load Balancer)
 # - ALB (Application Load Balancer)
 #
 # Here an Application Load Balancer is created.
-# It listens for HTTP and HTTPS, and forwards HTTPS to instances of the 
+# It listens for HTTP and HTTPS, and forwards HTTPS to instances of the
 # target group.
 # The target group is made of instances, which are the instances of the
-# autoscaling group. 
+# autoscaling group.
 
 data "aws_ip_ranges" "cloudfront" {
   regions  = ["global"]
@@ -107,7 +107,7 @@ resource "aws_lb" "quortex_public" {
 
 # Target group of the ALB (type IP)
 resource "aws_lb_target_group" "quortex_public" {
-  # Instances can be attached to this group automatically by specifying 
+  # Instances can be attached to this group automatically by specifying
   # this group id in an autoscaling group.
 
   # No target group will be created if the target port is not defined
@@ -133,7 +133,7 @@ resource "aws_lb_target_group" "quortex_public" {
     enabled             = var.public_lb_health_check_enabled
     interval            = var.public_lb_health_check_interval
     path                = var.public_lb_health_check_path
-    port                = var.public_lb_health_check_port
+    port                = length(var.public_lb_health_check_ports) > 0 ? var.public_lb_health_check_ports[count.index] : var.public_lb_health_check_port
     protocol            = var.public_lb_health_check_protocol
     timeout             = var.public_lb_health_check_timeout
     healthy_threshold   = var.public_lb_health_check_healthy_threshold
