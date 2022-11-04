@@ -314,8 +314,14 @@ variable "private_lb_health_check_path" {
 
 variable "private_lb_health_check_port" {
   type        = string
-  description = "The port to use to connect with the target. Valid values are either ports 1-65535, or traffic-port. Defaults to traffic-port."
+  description = "The single port to use to health check all targets. Valid values are either ports 1-65535, or traffic-port. Defaults to traffic-port."
   default     = "traffic-port"
+}
+
+variable "private_lb_health_check_ports" {
+  type        = list(string)
+  description = "The port list to use to health check all targets. If present, it should contain the same number of health check ports than the number of backends. If absent private_lb_health_check_port will be used."
+  default     = []
 }
 
 variable "private_lb_health_check_protocol" {
@@ -427,8 +433,14 @@ variable "public_lb_health_check_path" {
 
 variable "public_lb_health_check_port" {
   type        = string
-  description = "The port to use to connect with the target. Valid values are either ports 1-65535, or traffic-port. Defaults to traffic-port."
+  description = "The single port to use to health check all targets. Valid values are either ports 1-65535, or traffic-port. Defaults to traffic-port."
   default     = "traffic-port"
+}
+
+variable "public_lb_health_check_ports" {
+  type        = list(string)
+  description = "The port list to use to health check all targets. If present, it should contain the same number of health check ports than the number of backends. If absent private_lb_health_check_port will be used."
+  default     = []
 }
 
 variable "public_lb_health_check_protocol" {
