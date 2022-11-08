@@ -24,13 +24,13 @@ locals {
   quortex_private_attachments = flatten([for asg_name in var.load_balancer_autoscaling_group_names : [for target_group in aws_lb_target_group.quortex_private : { "target_group_arn" : target_group.arn, "asg_name" : asg_name }]])
 }
 
-# Attach the autoscaling groups to the public ALB target groups 
+# Attach the autoscaling groups to the public ALB target groups
 resource "aws_autoscaling_attachment" "quortex_public" {
   # No target group will be created if backend port is not defined
   count = length(local.quortex_public_attachments)
 
   autoscaling_group_name = local.quortex_public_attachments[count.index].asg_name
-  alb_target_group_arn   = local.quortex_public_attachments[count.index].target_group_arn
+  lb_target_group_arn   = local.quortex_public_attachments[count.index].target_group_arn
 }
 
 # Attach the autoscaling groups to the private ALB target groups
@@ -39,6 +39,5 @@ resource "aws_autoscaling_attachment" "quortex_private" {
   count = length(local.quortex_private_attachments)
 
   autoscaling_group_name = local.quortex_private_attachments[count.index].asg_name
-  alb_target_group_arn   = local.quortex_private_attachments[count.index].target_group_arn
+  lb_target_group_arn   = local.quortex_private_attachments[count.index].target_group_arn
 }
-

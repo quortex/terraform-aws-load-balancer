@@ -15,9 +15,15 @@
  */
 
 terraform {
-  required_version = ">= 0.12.17"
+  required_version = ">= 0.14.11"
 
   required_providers {
-    aws = ">= 2.38.0"
+    aws = {
+      version = ">= 2.38.0"
+      source = "hashicorp/aws"
+      configuration_aliases = [
+        aws.us-east-1,
+      ]
+    }
   }
 }

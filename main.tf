@@ -16,6 +16,6 @@
 
 # Additionnal provider configuration for N. Virginia
 # Used to create cloudfront related resources (a certificate in the "us-east-1" region is required by CloudFront)
-provider "aws" {
-  alias = "us-east-1"
-}
+#provider "aws" {
+#  alias = "us-east-1"
+#}
