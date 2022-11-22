@@ -175,6 +175,11 @@ variable "load_balancer_autoscaling_group_names" {
   description = "The name of the autoscaling groups containing the target instances, so that instances can be attached to the load balancer's target group."
 }
 
+variable "load_balancer_autoscaling_group_count" {
+  type        = number
+  description = "The number of autoscaling groups to be attached to LB."
+}
+
 variable "dns_hosted_zone_id" {
   type        = string
   description = "The ID of the hosted zone in Route53, under which the DNS record should be created. Can be null if no DNS records need to be created. Required if ssl_certificate_arn is null, to validate the certificate created by this module."
