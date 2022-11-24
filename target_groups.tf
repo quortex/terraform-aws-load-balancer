@@ -27,7 +27,7 @@ locals {
 # Attach the autoscaling groups to the public ALB target groups
 resource "aws_autoscaling_attachment" "quortex_public" {
   # No target group will be created if backend port is not defined
-  count = var.load_balancer_autoscaling_group_count
+  count = var.load_balancer_autoscaling_group_count *  length(var.load_balancer_public_app_backend_ports)
 
   autoscaling_group_name = local.quortex_public_attachments[count.index].asg_name
   lb_target_group_arn   = local.quortex_public_attachments[count.index].target_group_arn
@@ -36,7 +36,7 @@ resource "aws_autoscaling_attachment" "quortex_public" {
 # Attach the autoscaling groups to the private ALB target groups
 resource "aws_autoscaling_attachment" "quortex_private" {
   # No target group will be created if backend port is not defined
-  count = var.load_balancer_autoscaling_group_count
+  count = var.load_balancer_autoscaling_group_count * length(var.load_balancer_private_app_backend_ports)
 
   autoscaling_group_name = local.quortex_private_attachments[count.index].asg_name
   lb_target_group_arn   = local.quortex_private_attachments[count.index].target_group_arn
