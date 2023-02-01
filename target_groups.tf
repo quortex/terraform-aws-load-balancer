@@ -14,36 +14,48 @@
  * limitations under the License.
 */
 
-# Attach each autoscaling group to each target group
-# The setproduct is maybe a bit overkill since there should be only 0 or 1 target group...
-
-locals {
-  # We create an attachment for each autoscaling_group / target_group
-  # combination in order to best distribute the load in the cluster.
-  quortex_public_attachments = {
-    for c in setproduct(aws_lb_target_group.quortex_public.*.arn, var.load_balancer_autoscaling_group_names) :
-    "${c.0}_${c.1}" => { "target_group_arn" : c.0, "asg_name" : c.1 }
-  }
-  quortex_private_attachments = {
-    for c in setproduct(aws_lb_target_group.quortex_private.*.arn, var.load_balancer_autoscaling_group_names) :
-    "${c.0}_${c.1}" => { "target_group_arn" : c.0, "asg_name" : c.1 }
-  }
-}
+# We create an attachment for each combination of autoscaling_group and
+# target_group in order to distribute evenly the load in the cluster.
+#
+# When working with unknown values in for_each, it's better to define the map keys statically in your
+# configuration and place apply-time results only in the map values. Because of this, we use port count
+# concatenated with autoscaling groups keys as for_each key, and we lookup target group ARNs and
+# autoscaling groups names.
 
 # Attach the autoscaling groups to the public ALB target groups
 resource "aws_autoscaling_attachment" "quortex_public" {
-  # No target group will be created if backend port is not defined
-  for_each = length(var.load_balancer_public_app_backend_ports) > 0 ? local.quortex_public_attachments : {}
+  for_each = {
+    for c in setproduct(
+      range(length(var.load_balancer_public_app_backend_ports)),
+      keys(var.load_balancer_autoscaling_groups)
+    ) :
+    "${var.load_balancer_public_app_backend_ports[c.0]}_${c.1}" => {
+      // retrieve the target group ARN from the port count
+      target_group_arn = aws_lb_target_group.quortex_public[c.0].arn
+      // retrieve the autoscaling group name from its key
+      autoscaling_group_name = var.load_balancer_autoscaling_groups[c.1]
+    }
+  }
 
-  autoscaling_group_name = each.value.asg_name
-  lb_target_group_arn   = each.value.target_group_arn
+  lb_target_group_arn    = each.value.target_group_arn
+  autoscaling_group_name = each.value.autoscaling_group_name
 }
 
 # Attach the autoscaling groups to the private ALB target groups
 resource "aws_autoscaling_attachment" "quortex_private" {
-  # No target group will be created if backend port is not defined
-  for_each = length(var.load_balancer_private_app_backend_ports) > 0 ? local.quortex_private_attachments : {}
+  for_each = {
+    for c in setproduct(
+      range(length(var.load_balancer_private_app_backend_ports)),
+      keys(var.load_balancer_autoscaling_groups)
+    ) :
+    "${var.load_balancer_private_app_backend_ports[c.0]}_${c.1}" => {
+      // retrieve the target group ARN from the port count
+      target_group_arn = aws_lb_target_group.quortex_private[c.0].arn
+      // retrieve the autoscaling group name from its key
+      autoscaling_group_name = var.load_balancer_autoscaling_groups[c.1]
+    }
+  }
 
-  autoscaling_group_name = each.value.asg_name
-  lb_target_group_arn   = each.value.target_group_arn
+  lb_target_group_arn    = each.value.target_group_arn
+  autoscaling_group_name = each.value.autoscaling_group_name
 }
