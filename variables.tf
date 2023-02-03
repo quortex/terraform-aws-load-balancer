@@ -170,14 +170,9 @@ variable "load_balancer_public_whitelisted_ips" {
   default     = []
 }
 
-variable "load_balancer_autoscaling_group_names" {
-  type        = list(string)
-  description = "The name of the autoscaling groups containing the target instances, so that instances can be attached to the load balancer's target group."
-}
-
-variable "load_balancer_autoscaling_group_count" {
-  type        = number
-  description = "The number of autoscaling groups to be attached to LB."
+variable "load_balancer_autoscaling_groups" {
+  type        = map(string)
+  description = "A map associating a key to the name of the autoscaling groups containing the target instances, so that instances can be attached to the load balancer's target group. The keys must be known before apply."
 }
 
 variable "dns_hosted_zone_id" {
