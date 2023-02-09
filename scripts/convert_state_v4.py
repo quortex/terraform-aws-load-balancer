@@ -41,7 +41,7 @@ def filter_resources(**kwargs):
     return (
         resource
         for resource in state["resources"]
-        if all(resource[k] == v for k, v in kwargs.items())
+        if all(resource.get(k) == v for k, v in kwargs.items())
     )
 
 
