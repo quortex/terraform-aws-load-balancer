@@ -26,15 +26,10 @@
 # The target group is made of instances, which are the instances of the
 # autoscaling group.
 
-data "aws_ip_ranges" "cloudfront" {
-  regions  = ["global"]
-  services = ["cloudfront"]
-}
 
 locals {
   # Important note: the default quota for "Inbound or outbound rules per security group" is 60, it is not sufficient to fit all the Cloudfront IP ranges. This quota should be increased in the region used.
-  cdn_whitelist                                     = var.cdn_create_distribution ? data.aws_ip_ranges.cloudfront.cidr_blocks : []
-  public_lb_allowed_ip_ranges                       = toset(var.load_balancer_public_restrict_ip_access ? concat(local.cdn_whitelist, var.load_balancer_public_whitelisted_ips) : ["0.0.0.0/0"])
+  public_lb_allowed_ip_ranges                       = toset(var.load_balancer_public_restrict_ip_access ? var.load_balancer_public_whitelisted_ips : ["0.0.0.0/0"])
   load_balancer_public_whitelisted_token_ips_chunks = chunklist(var.load_balancer_public_whitelisted_token_ips, 5)
 }
 
