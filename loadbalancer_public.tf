@@ -68,6 +68,14 @@ resource "aws_security_group_rule" "lb_public_http" {
   protocol          = "tcp"
   cidr_blocks       = [each.value]
   security_group_id = aws_security_group.quortex_public.id
+
+  lifecycle {
+    create_before_destroy = true
+  }
+
+  depends_on = [
+    aws_security_group_rule.lb_public_http_prefix_list
+  ]
 }
 
 resource "aws_security_group_rule" "lb_public_https" {
@@ -80,6 +88,14 @@ resource "aws_security_group_rule" "lb_public_https" {
   protocol          = "tcp"
   cidr_blocks       = [each.value]
   security_group_id = aws_security_group.quortex_public.id
+
+  lifecycle {
+    create_before_destroy = true
+  }
+
+  depends_on = [
+    aws_security_group_rule.lb_public_https_prefix_list
+  ]
 }
 
 resource "aws_security_group_rule" "lb_public_http_prefix_list" {
