@@ -56,37 +56,37 @@ variable "public_lb_target_group_name" {
   default     = ""
 }
 
-variable "public_lb_tls_listener" {
+variable "public_lb_tls_listener_name" {
   type        = string
   description = "Name of the public ALB TLS listener"
   default     = ""
 }
 
-variable "public_lb_tls_listener_rule_token" {
+variable "public_lb_tls_listener_rule_token_name" {
   type        = string
   description = "Name of the public ALB TLS listener rule with token authorization"
   default     = ""
 }
 
-variable "public_lb_tls_listener_rule_whitelist" {
+variable "public_lb_tls_listener_rule_whitelist_name" {
   type        = string
   description = "Name of the public ALB TLS listener rule with ip authorization"
   default     = ""
 }
 
-variable "public_lb_http_listener" {
+variable "public_lb_http_listener_name" {
   type        = string
   description = "Name of the public ALB HTTP listener"
   default     = ""
 }
 
-variable "public_lb_http_listener_rule_token" {
+variable "public_lb_http_listener_rule_token_name" {
   type        = string
   description = "Name of the public ALB HTTP listener rule with token authorization"
   default     = ""
 }
 
-variable "public_lb_http_listener_rule_whitelist" {
+variable "public_lb_http_listener_rule_whitelist_name" {
   type        = string
   description = "Name of the public ALB HTTP listener rule with ip authorization"
   default     = ""

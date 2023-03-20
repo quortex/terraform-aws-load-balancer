@@ -239,7 +239,7 @@ resource "aws_lb_listener" "quortex_public_tls" {
   }
 
   tags = merge({
-    Name = local.public_lb_tls_listener
+    Name = local.public_lb_tls_listener_name
     },
     var.tags
   )
@@ -280,7 +280,7 @@ resource "aws_lb_listener_rule" "quortex_public_tls_token_rule" {
   }
 
   tags = merge({
-    Name = local.public_lb_tls_listener_rule_token
+    Name = local.public_lb_tls_listener_rule_token_name
     },
     var.tags
   )
@@ -305,7 +305,7 @@ resource "aws_lb_listener_rule" "quortex_public_tls_whitelist_rule" {
   }
 
   tags = merge({
-    Name = local.public_lb_tls_listener_rule_whitelist
+    Name = local.public_lb_tls_listener_rule_whitelist_name
     },
     var.tags
   )
@@ -358,7 +358,7 @@ resource "aws_lb_listener" "quortex_public_http" {
   }
 
   tags = merge({
-    Name = local.public_lb_http_listener
+    Name = local.public_lb_http_listener_name
     },
     var.tags
   )
@@ -390,7 +390,7 @@ resource "aws_lb_listener_rule" "quortex_public_http_token_rule" {
   }
 
   tags = merge({
-    Name = local.public_lb_http_listener_rule_token
+    Name = local.public_lb_http_listener_rule_token_name
     },
     var.tags
   )
@@ -415,7 +415,7 @@ resource "aws_lb_listener_rule" "quortex_public_http_whitelist_rule" {
   }
 
   tags = merge({
-    Name = local.public_lb_http_listener_rule_whitelist
+    Name = local.public_lb_http_listener_rule_whitelist_name
     },
     var.tags
   )
