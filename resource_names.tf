@@ -15,13 +15,19 @@
 */
 
 locals {
-  private_lb_security_group_name = length(var.private_lb_security_group_name) > 0 ? var.private_lb_security_group_name : "${var.resource_name}-priv"
-  private_lb_name                = length(var.private_lb_name) > 0 ? var.private_lb_name : "${var.resource_name}-priv"
-  private_lb_target_group_name   = length(var.private_lb_target_group_name) > 0 ? var.private_lb_target_group_name : "${var.resource_name}-priv"
-  public_lb_security_group_name  = length(var.public_lb_security_group_name) > 0 ? var.public_lb_security_group_name : "${var.resource_name}-pub"
-  public_lb_name                 = length(var.public_lb_name) > 0 ? var.public_lb_name : "${var.resource_name}-pub"
-  public_lb_target_group_name    = length(var.public_lb_target_group_name) > 0 ? var.public_lb_target_group_name : "${var.resource_name}-pub"
-  ssl_certificate_name           = length(var.ssl_certificate_name) > 0 ? var.ssl_certificate_name : var.resource_name
-  cdn_distribution_name          = length(var.cdn_distribution_name) > 0 ? var.cdn_distribution_name : var.resource_name
-  cdn_ssl_certificate_name       = length(var.cdn_ssl_certificate_name) > 0 ? var.cdn_ssl_certificate_name : "${var.resource_name}-cdn"
+  private_lb_security_group_name              = length(var.private_lb_security_group_name) > 0 ? var.private_lb_security_group_name : "${var.resource_name}-priv"
+  private_lb_name                             = length(var.private_lb_name) > 0 ? var.private_lb_name : "${var.resource_name}-priv"
+  private_lb_target_group_name                = length(var.private_lb_target_group_name) > 0 ? var.private_lb_target_group_name : "${var.resource_name}-priv"
+  public_lb_security_group_name               = length(var.public_lb_security_group_name) > 0 ? var.public_lb_security_group_name : "${var.resource_name}-pub"
+  public_lb_name                              = length(var.public_lb_name) > 0 ? var.public_lb_name : "${var.resource_name}-pub"
+  public_lb_target_group_name                 = length(var.public_lb_target_group_name) > 0 ? var.public_lb_target_group_name : "${var.resource_name}-pub"
+  public_lb_tls_listener_name                 = length(var.public_lb_tls_listener_name) > 0 ? var.public_lb_tls_listener_name : "${var.resource_name}-pub"
+  public_lb_tls_listener_rule_token_name      = length(var.public_lb_tls_listener_rule_token_name) > 0 ? var.public_lb_tls_listener_rule_token_name : "${var.resource_name}-pub"
+  public_lb_tls_listener_rule_whitelist_name  = length(var.public_lb_tls_listener_rule_whitelist_name) > 0 ? var.public_lb_tls_listener_rule_whitelist_name : "${var.resource_name}-pub"
+  public_lb_http_listener_name                = length(var.public_lb_http_listener_name) > 0 ? var.public_lb_http_listener_name : "${var.resource_name}-pub"
+  public_lb_http_listener_rule_token_name     = length(var.public_lb_http_listener_rule_token_name) > 0 ? var.public_lb_http_listener_rule_token_name : "${var.resource_name}-pub"
+  public_lb_http_listener_rule_whitelist_name = length(var.public_lb_http_listener_rule_whitelist_name) > 0 ? var.public_lb_http_listener_rule_whitelist_name : "${var.resource_name}-pub"
+  ssl_certificate_name                        = length(var.ssl_certificate_name) > 0 ? var.ssl_certificate_name : var.resource_name
+  cdn_distribution_name                       = length(var.cdn_distribution_name) > 0 ? var.cdn_distribution_name : var.resource_name
+  cdn_ssl_certificate_name                    = length(var.cdn_ssl_certificate_name) > 0 ? var.cdn_ssl_certificate_name : "${var.resource_name}-cdn"
 }

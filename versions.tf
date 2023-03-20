@@ -19,8 +19,8 @@ terraform {
 
   required_providers {
     aws = {
-      version = ">= 2.38.0"
-      source = "hashicorp/aws"
+      version = ">= 4.58.0"
+      source  = "hashicorp/aws"
       configuration_aliases = [
         aws.us-east-1,
       ]

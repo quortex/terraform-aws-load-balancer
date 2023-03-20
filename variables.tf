@@ -56,6 +56,42 @@ variable "public_lb_target_group_name" {
   default     = ""
 }
 
+variable "public_lb_tls_listener_name" {
+  type        = string
+  description = "Name of the public ALB TLS listener"
+  default     = ""
+}
+
+variable "public_lb_tls_listener_rule_token_name" {
+  type        = string
+  description = "Name of the public ALB TLS listener rule with token authorization"
+  default     = ""
+}
+
+variable "public_lb_tls_listener_rule_whitelist_name" {
+  type        = string
+  description = "Name of the public ALB TLS listener rule with ip authorization"
+  default     = ""
+}
+
+variable "public_lb_http_listener_name" {
+  type        = string
+  description = "Name of the public ALB HTTP listener"
+  default     = ""
+}
+
+variable "public_lb_http_listener_rule_token_name" {
+  type        = string
+  description = "Name of the public ALB HTTP listener rule with token authorization"
+  default     = ""
+}
+
+variable "public_lb_http_listener_rule_whitelist_name" {
+  type        = string
+  description = "Name of the public ALB HTTP listener rule with ip authorization"
+  default     = ""
+}
+
 variable "ssl_certificate_name" {
   type        = string
   description = "Name of the SSL certificate.  Not used if an existing certificate ARN is provided."
@@ -158,15 +194,33 @@ variable "load_balancer_private_whitelisted_ips" {
   default     = []
 }
 
-variable "load_balancer_public_restrict_access" {
+variable "load_balancer_public_restrict_ip_access" {
   type        = bool
   description = "Whether the public load balancer access should be restricted. It is useful to restrict access if a CDN is setup in front."
   default     = false
 }
 
+variable "load_balancer_public_restrict_token_access" {
+  type        = bool
+  default     = false
+  description = "Set to true if the loadbalancer should refuse request without the correct x-auth-token"
+}
+
 variable "load_balancer_public_whitelisted_ips" {
   type        = list(string)
-  description = "A list of IP ranges to whitelist for restricted access to the public load balancer. The CloudFront ip range is already included."
+  description = "A list of IP ranges to whitelist for restricted ip access to the public load balancer."
+  default     = []
+}
+
+variable "load_balancer_public_whitelisted_prefix_lists" {
+  type        = list(string)
+  description = "A list of prefix list names to whitelist for restricted ip access to the public load balancer."
+  default     = []
+}
+
+variable "load_balancer_public_whitelisted_token_ips" {
+  type        = list(string)
+  description = "A list of IP ranges to whitelist for restricted token access to the public load balancer."
   default     = []
 }
 

@@ -33,8 +33,15 @@ data "aws_ip_ranges" "cloudfront" {
 
 locals {
   # Important note: the default quota for "Inbound or outbound rules per security group" is 60, it is not sufficient to fit all the Cloudfront IP ranges. This quota should be increased in the region used.
-  cdn_whitelist               = var.cdn_create_distribution ? data.aws_ip_ranges.cloudfront.cidr_blocks : []
-  public_lb_allowed_ip_ranges = toset(var.load_balancer_public_restrict_access ? concat(local.cdn_whitelist, var.load_balancer_public_whitelisted_ips) : ["0.0.0.0/0"])
+  cdn_whitelist                                     = var.cdn_create_distribution ? data.aws_ip_ranges.cloudfront.cidr_blocks : []
+  public_lb_allowed_ip_ranges                       = toset(var.load_balancer_public_restrict_ip_access ? concat(local.cdn_whitelist, var.load_balancer_public_whitelisted_ips) : ["0.0.0.0/0"])
+  load_balancer_public_whitelisted_token_ips_chunks = chunklist(var.load_balancer_public_whitelisted_token_ips, 5)
+}
+
+# Random password set into x-auth-token
+resource "random_password" "x_auth_token" {
+  length  = 128
+  special = true
 }
 
 # Security group
@@ -61,6 +68,14 @@ resource "aws_security_group_rule" "lb_public_http" {
   protocol          = "tcp"
   cidr_blocks       = [each.value]
   security_group_id = aws_security_group.quortex_public.id
+
+  lifecycle {
+    create_before_destroy = true
+  }
+
+  depends_on = [
+    aws_security_group_rule.lb_public_http_prefix_list
+  ]
 }
 
 resource "aws_security_group_rule" "lb_public_https" {
@@ -72,6 +87,38 @@ resource "aws_security_group_rule" "lb_public_https" {
   to_port           = 443
   protocol          = "tcp"
   cidr_blocks       = [each.value]
+  security_group_id = aws_security_group.quortex_public.id
+
+  lifecycle {
+    create_before_destroy = true
+  }
+
+  depends_on = [
+    aws_security_group_rule.lb_public_https_prefix_list
+  ]
+}
+
+resource "aws_security_group_rule" "lb_public_http_prefix_list" {
+  count = var.load_balancer_public_expose_http && var.load_balancer_public_restrict_ip_access && length(var.load_balancer_public_whitelisted_prefix_lists) > 0 ? 1 : 0
+
+  description       = "Allow simple HTTP from cloudfront prefix list"
+  type              = "ingress"
+  from_port         = 80
+  to_port           = 80
+  protocol          = "tcp"
+  prefix_list_ids   = var.load_balancer_public_whitelisted_prefix_lists
+  security_group_id = aws_security_group.quortex_public.id
+}
+
+resource "aws_security_group_rule" "lb_public_https_prefix_list" {
+  count = var.load_balancer_public_expose_https && var.load_balancer_public_restrict_ip_access && length(var.load_balancer_public_whitelisted_prefix_lists) > 0 ? 1 : 0
+
+  description       = "Allow TLS HTTP from from cloudfront prefix list"
+  type              = "ingress"
+  from_port         = 443
+  to_port           = 443
+  protocol          = "tcp"
+  prefix_list_ids   = var.load_balancer_public_whitelisted_prefix_lists
   security_group_id = aws_security_group.quortex_public.id
 }
 
@@ -169,10 +216,33 @@ resource "aws_lb_listener" "quortex_public_tls" {
   ssl_policy        = var.public_lb_ssl_policy
   certificate_arn   = var.ssl_certificate_arn == null ? aws_acm_certificate_validation.cert[0].certificate_arn : var.ssl_certificate_arn
 
-  default_action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.quortex_public[count.index].arn
+  dynamic "default_action" {
+    for_each = var.load_balancer_public_restrict_token_access ? [1] : []
+
+    content {
+      type = "fixed-response"
+      fixed_response {
+        status_code  = 403
+        content_type = "text/plain"
+        message_body = "403 Forbidden"
+      }
+    }
   }
+
+  dynamic "default_action" {
+    for_each = var.load_balancer_public_restrict_token_access ? [] : [1]
+
+    content {
+      type             = "forward"
+      target_group_arn = aws_lb_target_group.quortex_public[count.index].arn
+    }
+  }
+
+  tags = merge({
+    Name = local.public_lb_tls_listener_name
+    },
+    var.tags
+  )
 }
 
 # Provides Load Balancer Listener Certificate resources.
@@ -182,6 +252,63 @@ resource "aws_lb_listener_certificate" "quortex_public" {
 
   listener_arn    = aws_lb_listener.quortex_public_tls[0].arn
   certificate_arn = each.value
+}
+
+resource "aws_lb_listener_rule" "quortex_public_tls_token_rule" {
+  # This rule forwards traffic if the header token match the condition
+  count = var.load_balancer_public_expose_https ? 1 : 0
+
+  listener_arn = aws_lb_listener.quortex_public_tls[0].arn
+  priority     = 1000
+
+  action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.quortex_public[0].arn
+  }
+
+  condition {
+    http_header {
+      http_header_name = "x-auth-token"
+      values           = [random_password.x_auth_token.result]
+    }
+  }
+
+  lifecycle {
+    ignore_changes = [
+      condition
+    ]
+  }
+
+  tags = merge({
+    Name = local.public_lb_tls_listener_rule_token_name
+    },
+    var.tags
+  )
+}
+
+resource "aws_lb_listener_rule" "quortex_public_tls_whitelist_rule" {
+  # This rule forwards traffic if the ips are in the whitelist
+  count = var.load_balancer_public_expose_https && var.load_balancer_public_restrict_token_access ? length(local.load_balancer_public_whitelisted_token_ips_chunks) : 0
+
+  listener_arn = aws_lb_listener.quortex_public_tls[0].arn
+  priority     = 10000 + count.index
+
+  action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.quortex_public[0].arn
+  }
+
+  condition {
+    source_ip {
+      values = local.load_balancer_public_whitelisted_token_ips_chunks[count.index]
+    }
+  }
+
+  tags = merge({
+    Name = local.public_lb_tls_listener_rule_whitelist_name
+    },
+    var.tags
+  )
 }
 
 # HTTP listener (80)
@@ -209,11 +336,87 @@ resource "aws_lb_listener" "quortex_public_http" {
   }
 
   dynamic "default_action" {
-    for_each = var.load_balancer_public_redirect_http_to_https ? [] : [1]
+    for_each = !var.load_balancer_public_redirect_http_to_https && var.load_balancer_public_restrict_token_access ? [1] : []
+
+    content {
+      type = "fixed-response"
+      fixed_response {
+        status_code  = 403
+        content_type = "text/plain"
+        message_body = "403 Forbidden"
+      }
+    }
+  }
+
+  dynamic "default_action" {
+    for_each = !var.load_balancer_public_redirect_http_to_https && var.load_balancer_public_restrict_token_access ? [] : [1]
 
     content {
       type             = "forward"
       target_group_arn = aws_lb_target_group.quortex_public[count.index].arn
     }
   }
+
+  tags = merge({
+    Name = local.public_lb_http_listener_name
+    },
+    var.tags
+  )
+}
+
+resource "aws_lb_listener_rule" "quortex_public_http_token_rule" {
+  # This rule forwards traffic if the header token match the condition
+  count = var.load_balancer_public_expose_http ? 1 : 0
+
+  listener_arn = aws_lb_listener.quortex_public_http[0].arn
+  priority     = 1000
+
+  action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.quortex_public[0].arn
+  }
+
+  condition {
+    http_header {
+      http_header_name = "x-auth-token"
+      values           = [random_password.x_auth_token.result]
+    }
+  }
+
+  lifecycle {
+    ignore_changes = [
+      condition
+    ]
+  }
+
+  tags = merge({
+    Name = local.public_lb_http_listener_rule_token_name
+    },
+    var.tags
+  )
+}
+
+resource "aws_lb_listener_rule" "quortex_public_http_whitelist_rule" {
+  # This rule forwards traffic if the ips are in the whitelist
+  count = var.load_balancer_public_expose_http && var.load_balancer_public_restrict_token_access ? length(local.load_balancer_public_whitelisted_token_ips_chunks) : 0
+
+  listener_arn = aws_lb_listener.quortex_public_http[0].arn
+  priority     = 10000 + count.index
+
+  action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.quortex_public[0].arn
+  }
+
+  condition {
+    source_ip {
+      values = local.load_balancer_public_whitelisted_token_ips_chunks[count.index]
+    }
+  }
+
+  tags = merge({
+    Name = local.public_lb_http_listener_rule_whitelist_name
+    },
+    var.tags
+  )
 }
