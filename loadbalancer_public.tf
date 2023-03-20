@@ -53,15 +53,14 @@ resource "aws_security_group" "quortex_public" {
 }
 
 # Security group rules
-resource "aws_security_group_rule" "lb_public_http" {
+resource "aws_vpc_security_group_ingress_rule" "lb_public_http" {
   for_each = var.load_balancer_public_expose_http ? local.public_lb_allowed_ip_ranges : []
 
   description       = "Allow simple HTTP from whitelisted ip ranges only"
-  type              = "ingress"
   from_port         = 80
   to_port           = 80
-  protocol          = "tcp"
-  cidr_blocks       = [each.value]
+  ip_protocol       = "tcp"
+  cidr_ipv4         = each.value
   security_group_id = aws_security_group.quortex_public.id
 
   lifecycle {
@@ -69,19 +68,20 @@ resource "aws_security_group_rule" "lb_public_http" {
   }
 
   depends_on = [
-    aws_security_group_rule.lb_public_http_prefix_list
+    aws_vpc_security_group_ingress_rule.lb_public_http_prefix_list
   ]
+
+  tags = var.tags
 }
 
-resource "aws_security_group_rule" "lb_public_https" {
+resource "aws_vpc_security_group_ingress_rule" "lb_public_https" {
   for_each = var.load_balancer_public_expose_https ? local.public_lb_allowed_ip_ranges : []
 
   description       = "Allow TLS HTTP from whitelisted ip ranges only"
-  type              = "ingress"
   from_port         = 443
   to_port           = 443
-  protocol          = "tcp"
-  cidr_blocks       = [each.value]
+  ip_protocol       = "tcp"
+  cidr_ipv4         = each.value
   security_group_id = aws_security_group.quortex_public.id
 
   lifecycle {
@@ -89,42 +89,45 @@ resource "aws_security_group_rule" "lb_public_https" {
   }
 
   depends_on = [
-    aws_security_group_rule.lb_public_https_prefix_list
+    aws_vpc_security_group_ingress_rule.lb_public_https_prefix_list
   ]
+
+  tags = var.tags
 }
 
-resource "aws_security_group_rule" "lb_public_http_prefix_list" {
-  count = var.load_balancer_public_expose_http && var.load_balancer_public_restrict_ip_access && length(var.load_balancer_public_whitelisted_prefix_lists) > 0 ? 1 : 0
+resource "aws_vpc_security_group_ingress_rule" "lb_public_http_prefix_list" {
+  count = var.load_balancer_public_expose_http && var.load_balancer_public_restrict_ip_access ? length(var.load_balancer_public_whitelisted_prefix_lists) : 0
 
   description       = "Allow simple HTTP from cloudfront prefix list"
-  type              = "ingress"
   from_port         = 80
   to_port           = 80
-  protocol          = "tcp"
-  prefix_list_ids   = var.load_balancer_public_whitelisted_prefix_lists
+  ip_protocol       = "tcp"
+  prefix_list_id    = var.load_balancer_public_whitelisted_prefix_lists[count.index]
   security_group_id = aws_security_group.quortex_public.id
+
+  tags = var.tags
 }
 
-resource "aws_security_group_rule" "lb_public_https_prefix_list" {
-  count = var.load_balancer_public_expose_https && var.load_balancer_public_restrict_ip_access && length(var.load_balancer_public_whitelisted_prefix_lists) > 0 ? 1 : 0
+resource "aws_vpc_security_group_ingress_rule" "lb_public_https_prefix_list" {
+  count = var.load_balancer_public_expose_https && var.load_balancer_public_restrict_ip_access ? length(var.load_balancer_public_whitelisted_prefix_lists) : 0
 
   description       = "Allow TLS HTTP from from cloudfront prefix list"
-  type              = "ingress"
   from_port         = 443
   to_port           = 443
-  protocol          = "tcp"
-  prefix_list_ids   = var.load_balancer_public_whitelisted_prefix_lists
+  ip_protocol       = "tcp"
+  prefix_list_id    = var.load_balancer_public_whitelisted_prefix_lists[count.index]
   security_group_id = aws_security_group.quortex_public.id
+
+  tags = var.tags
 }
 
-resource "aws_security_group_rule" "lb_public_egress" {
+resource "aws_vpc_security_group_egress_rule" "lb_public_egress" {
   description       = "Allow all traffic out"
-  type              = "egress"
-  from_port         = 0
-  to_port           = 0
-  protocol          = "all"
-  cidr_blocks       = ["0.0.0.0/0"]
+  ip_protocol       = -1
+  cidr_ipv4         = "0.0.0.0/0"
   security_group_id = aws_security_group.quortex_public.id
+
+  tags = var.tags
 }
 
 

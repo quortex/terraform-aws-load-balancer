@@ -82,6 +82,11 @@ module "load-balancer" {
 
 When upgrading an existing infrastructure from 1.6.0 to 1.7.0, the script migrate_terraform_security_group_rules.sh should be used to seamlessly migrate from inline security group rules to separate rule resources.
 
+> **Warning**
+> Upgrade from 4.0.0 to 5.0.0 is a breaking change. Replacement of aws_security_group_rule resources by aws_vpc_security_group_ingress_rule & aws_vpc_security_group_egress_rule can create conflicts and rules will be overwritten.
+
+---
+
 ## Related Projects
 
 This project is part of our terraform modules to provision a Quortex infrastructure for AWS.
