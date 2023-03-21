@@ -63,14 +63,6 @@ resource "aws_vpc_security_group_ingress_rule" "lb_public_http" {
   cidr_ipv4         = each.value
   security_group_id = aws_security_group.quortex_public.id
 
-  lifecycle {
-    create_before_destroy = true
-  }
-
-  depends_on = [
-    aws_vpc_security_group_ingress_rule.lb_public_http_prefix_list
-  ]
-
   tags = var.tags
 }
 
@@ -83,14 +75,6 @@ resource "aws_vpc_security_group_ingress_rule" "lb_public_https" {
   ip_protocol       = "tcp"
   cidr_ipv4         = each.value
   security_group_id = aws_security_group.quortex_public.id
-
-  lifecycle {
-    create_before_destroy = true
-  }
-
-  depends_on = [
-    aws_vpc_security_group_ingress_rule.lb_public_https_prefix_list
-  ]
 
   tags = var.tags
 }
