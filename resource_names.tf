@@ -28,6 +28,4 @@ locals {
   public_lb_http_listener_rule_token_name     = length(var.public_lb_http_listener_rule_token_name) > 0 ? var.public_lb_http_listener_rule_token_name : "${var.resource_name}-pub"
   public_lb_http_listener_rule_whitelist_name = length(var.public_lb_http_listener_rule_whitelist_name) > 0 ? var.public_lb_http_listener_rule_whitelist_name : "${var.resource_name}-pub"
   ssl_certificate_name                        = length(var.ssl_certificate_name) > 0 ? var.ssl_certificate_name : var.resource_name
-  cdn_distribution_name                       = length(var.cdn_distribution_name) > 0 ? var.cdn_distribution_name : var.resource_name
-  cdn_ssl_certificate_name                    = length(var.cdn_ssl_certificate_name) > 0 ? var.cdn_ssl_certificate_name : "${var.resource_name}-cdn"
 }
