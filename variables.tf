@@ -247,8 +247,20 @@ variable "ssl_certificate_domain_name" {
   default     = null
 }
 
+variable "public_tags" {
+  type        = map(string)
+  description = "The tags (a map of key/value pairs) to be applied to public loadbalancer resources."
+  default     = {}
+}
+
+variable "private_tags" {
+  type        = map(string)
+  description = "The tags (a map of key/value pairs) to be applied to private loadbalancer resources."
+  default     = {}
+}
+
 variable "tags" {
-  type        = map(any)
+  type        = map(string)
   description = "The tags (a map of key/value pairs) to be applied to created resources."
   default     = {}
 }
