@@ -100,6 +100,7 @@ resource "aws_lb" "quortex_private" {
   tags = merge({
     Name = local.private_lb_name
     },
+    var.private_tags,
     var.tags
   )
 }
