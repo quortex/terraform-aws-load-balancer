@@ -36,7 +36,7 @@ locals {
 # Random password set into x-auth-token
 resource "random_password" "x_auth_token" {
   length  = 128
-  special = true
+  special = false
 }
 
 # Security group
