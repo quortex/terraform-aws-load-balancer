@@ -65,7 +65,7 @@ output "lb_public_sg_id" {
 }
 
 output "lb_private_sg_id" {
-  value       = aws_security_group.quortex_private.id
+  value       = try(aws_security_group.quortex_private[0].id, null)
   description = "ID of the Security Group attached to the private load balancer."
 }
 
