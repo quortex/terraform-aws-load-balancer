@@ -212,6 +212,13 @@ variable "load_balancer_public_whitelisted_token_ips" {
   default     = []
 }
 
+variable "load_balancer_public_token" {
+  type        = string
+  description = "The default header x_auth_token value set in alb rule to restrict access."
+  default     = "x_auth_token_default_value"
+  sensitive   = true
+}
+
 variable "load_balancer_autoscaling_groups" {
   type        = map(string)
   description = "A map associating a key to the name of the autoscaling groups containing the target instances, so that instances can be attached to the load balancer's target group. The keys must be known before apply."
