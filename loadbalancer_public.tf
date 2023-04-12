@@ -33,12 +33,6 @@ locals {
   load_balancer_public_whitelisted_token_ips_chunks = chunklist(var.load_balancer_public_whitelisted_token_ips, 5)
 }
 
-# Random password set into x-auth-token
-resource "random_password" "x_auth_token" {
-  length  = 128
-  special = false
-}
-
 # Security group
 resource "aws_security_group" "quortex_public" {
   name        = local.public_lb_security_group_name
@@ -252,7 +246,7 @@ resource "aws_lb_listener_rule" "quortex_public_tls_token_rule" {
   condition {
     http_header {
       http_header_name = "x-auth-token"
-      values           = [random_password.x_auth_token.result]
+      values           = [var.load_balancer_public_token]
     }
   }
 
@@ -362,7 +356,7 @@ resource "aws_lb_listener_rule" "quortex_public_http_token_rule" {
   condition {
     http_header {
       http_header_name = "x-auth-token"
-      values           = [random_password.x_auth_token.result]
+      values           = [var.load_balancer_public_token]
     }
   }
 
