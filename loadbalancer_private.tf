@@ -227,7 +227,7 @@ resource "aws_lb_listener" "quortex_private_http" {
 
 # Private ELB access logs bucket configuration
 resource "aws_s3_bucket" "private_lb_access_logs" {
-  bucket        = var.private_lb_access_logs_bucket_name != "" ? var.private_lb_access_logs_bucket_name : "${var.resource_name}-access-logs"
+  bucket        = var.private_lb_access_logs_bucket_name != "" ? var.private_lb_access_logs_bucket_name : "${var.resource_name}-private-lb-access-logs"
   force_destroy = var.private_lb_access_logs_force_destroy
 
   tags = var.tags
@@ -283,15 +283,10 @@ resource "aws_s3_bucket_policy" "private_lb_access_logs" {
       {
         Effect = "Allow",
         Principal = {
-          Service = "delivery.logs.amazonaws.com"
+          Service = "logdelivery.elasticloadbalancing.amazonaws.com"
         },
         Action   = "s3:PutObject",
         Resource = "arn:aws:s3:::${aws_s3_bucket.private_lb_access_logs.bucket}/*",
-        Condition = {
-          StringEquals = {
-            "s3:x-amz-acl" = "bucket-owner-full-control"
-          }
-        }
       }
     ]
   })

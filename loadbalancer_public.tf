@@ -407,7 +407,7 @@ resource "aws_lb_listener_rule" "quortex_public_http_whitelist_rule" {
 
 # Public ELB access logs bucket configuration
 resource "aws_s3_bucket" "public_lb_access_logs" {
-  bucket        = var.public_lb_access_logs_bucket_name != "" ? var.public_lb_access_logs_bucket_name : "${var.resource_name}-access-logs"
+  bucket        = var.public_lb_access_logs_bucket_name != "" ? var.public_lb_access_logs_bucket_name : "${var.resource_name}-public-lb-access-logs"
   force_destroy = var.public_lb_access_logs_force_destroy
 
   tags = var.tags
@@ -463,15 +463,10 @@ resource "aws_s3_bucket_policy" "public_lb_access_logs" {
       {
         Effect = "Allow",
         Principal = {
-          Service = "delivery.logs.amazonaws.com"
+          Service = "logdelivery.elasticloadbalancing.amazonaws.com"
         },
         Action   = "s3:PutObject",
         Resource = "arn:aws:s3:::${aws_s3_bucket.public_lb_access_logs.bucket}/*",
-        Condition = {
-          StringEquals = {
-            "s3:x-amz-acl" = "bucket-owner-full-control"
-          }
-        }
       }
     ]
   })
