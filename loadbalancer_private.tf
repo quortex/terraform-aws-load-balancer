@@ -94,6 +94,13 @@ resource "aws_lb" "quortex_private" {
   security_groups    = [aws_security_group.quortex_private[0].id]
   subnets            = var.subnet_ids
 
+  # Access logs storage in s3
+  access_logs {
+    enabled = var.private_lb_access_logs_enabled
+    bucket  = aws_s3_bucket.private_lb_access_logs.bucket
+    prefix  = var.private_lb_access_logs_bucket_prefix
+  }
+
   # Advanced parameters
   idle_timeout = var.private_lb_idle_timeout
 
@@ -216,4 +223,76 @@ resource "aws_lb_listener" "quortex_private_http" {
       target_group_arn = aws_lb_target_group.quortex_private[count.index].arn
     }
   }
+}
+
+# Private ELB access logs bucket configuration
+resource "aws_s3_bucket" "private_lb_access_logs" {
+  bucket        = var.private_lb_access_logs_bucket_name != "" ? var.private_lb_access_logs_bucket_name : "${var.resource_name}-access-logs"
+  force_destroy = var.private_lb_access_logs_force_destroy
+
+  tags = var.tags
+}
+
+resource "aws_s3_bucket_lifecycle_configuration" "private_lb_access_logs" {
+  count = var.private_lb_access_logs_expiration != null ? 1 : 0
+
+  bucket = aws_s3_bucket.private_lb_access_logs.id
+  rule {
+    id     = "expiration"
+    status = "Enabled"
+    expiration {
+      days = var.private_lb_access_logs_expiration
+    }
+  }
+}
+
+resource "aws_s3_bucket_public_access_block" "private_lb_access_logs" {
+  bucket = aws_s3_bucket.private_lb_access_logs.id
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
+# Set minimal encryption on buckets
+resource "aws_s3_bucket_server_side_encryption_configuration" "private_lb_access_logs" {
+  count  = var.private_lb_access_logs_bucket_encryption ? 1 : 0
+  bucket = aws_s3_bucket.private_lb_access_logs.id
+
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "AES256"
+    }
+  }
+}
+
+resource "aws_s3_bucket_policy" "private_lb_access_logs" {
+  bucket = aws_s3_bucket.private_lb_access_logs.id
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Principal = {
+          AWS = "arn:aws:iam::${data.aws_elb_service_account.current.id}:root"
+        },
+        Action   = "s3:PutObject",
+        Resource = "arn:aws:s3:::${aws_s3_bucket.private_lb_access_logs.bucket}/*"
+      },
+      {
+        Effect = "Allow",
+        Principal = {
+          Service = "delivery.logs.amazonaws.com"
+        },
+        Action   = "s3:PutObject",
+        Resource = "arn:aws:s3:::${aws_s3_bucket.private_lb_access_logs.bucket}/*",
+        Condition = {
+          StringEquals = {
+            "s3:x-amz-acl" = "bucket-owner-full-control"
+          }
+        }
+      }
+    ]
+  })
 }

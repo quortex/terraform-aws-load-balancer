@@ -29,3 +29,5 @@ locals {
   public_lb_http_listener_rule_whitelist_name = length(var.public_lb_http_listener_rule_whitelist_name) > 0 ? var.public_lb_http_listener_rule_whitelist_name : "${var.resource_name}-pub"
   ssl_certificate_name                        = length(var.ssl_certificate_name) > 0 ? var.ssl_certificate_name : var.resource_name
 }
+
+data "aws_elb_service_account" "current" {}
