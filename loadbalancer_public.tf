@@ -118,6 +118,13 @@ resource "aws_lb" "quortex_public" {
   security_groups    = [aws_security_group.quortex_public.id]
   subnets            = var.subnet_ids
 
+  # Access logs storage in s3
+  access_logs {
+    enabled = var.public_lb_access_logs_enabled
+    bucket  = aws_s3_bucket.public_lb_access_logs.bucket
+    prefix  = var.public_lb_access_logs_bucket_prefix
+  }
+
   # Advanced parameters
   idle_timeout = var.public_lb_idle_timeout
 
@@ -396,4 +403,71 @@ resource "aws_lb_listener_rule" "quortex_public_http_whitelist_rule" {
     },
     var.tags
   )
+}
+
+# Public ELB access logs bucket configuration
+resource "aws_s3_bucket" "public_lb_access_logs" {
+  bucket        = var.public_lb_access_logs_bucket_name != "" ? var.public_lb_access_logs_bucket_name : "${var.resource_name}-public-lb-access-logs"
+  force_destroy = var.public_lb_access_logs_force_destroy
+
+  tags = var.tags
+}
+
+resource "aws_s3_bucket_lifecycle_configuration" "public_lb_access_logs" {
+  count = var.public_lb_access_logs_expiration != null ? 1 : 0
+
+  bucket = aws_s3_bucket.public_lb_access_logs.id
+  rule {
+    id     = "expiration"
+    status = "Enabled"
+    expiration {
+      days = var.public_lb_access_logs_expiration
+    }
+  }
+}
+
+resource "aws_s3_bucket_public_access_block" "public_lb_access_logs" {
+  bucket = aws_s3_bucket.public_lb_access_logs.id
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
+# Set minimal encryption on buckets
+resource "aws_s3_bucket_server_side_encryption_configuration" "public_lb_access_logs" {
+  count  = var.public_lb_access_logs_bucket_encryption ? 1 : 0
+  bucket = aws_s3_bucket.public_lb_access_logs.id
+
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "AES256"
+    }
+  }
+}
+
+resource "aws_s3_bucket_policy" "public_lb_access_logs" {
+  bucket = aws_s3_bucket.public_lb_access_logs.id
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Principal = {
+          AWS = "arn:aws:iam::${data.aws_elb_service_account.current.id}:root"
+        },
+        Action   = "s3:PutObject",
+        Resource = "arn:aws:s3:::${aws_s3_bucket.public_lb_access_logs.bucket}/*"
+      },
+      {
+        Effect = "Allow",
+        Principal = {
+          Service = "logdelivery.elasticloadbalancing.amazonaws.com"
+        },
+        Action   = "s3:PutObject",
+        Resource = "arn:aws:s3:::${aws_s3_bucket.public_lb_access_logs.bucket}/*",
+      }
+    ]
+  })
 }

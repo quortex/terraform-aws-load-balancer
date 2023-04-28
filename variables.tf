@@ -510,3 +510,77 @@ variable "public_lb_health_check_matcher" {
   type        = string
   description = " (Required for HTTP/HTTPS ALB) The HTTP codes to use when checking for a successful response from a target. You can specify multiple values (for example, \"200,202\") or a range of values (for example, \"200-299\")."
 }
+
+/* Public load balancer access logs params */
+variable "public_lb_access_logs_enabled" {
+  type        = bool
+  description = "Wether to enable the public load balancer access logs or not."
+  default     = false
+}
+
+variable "public_lb_access_logs_bucket_name" {
+  type        = string
+  description = "Override the public load balancer access logs bucket name."
+  default     = ""
+}
+
+variable "public_lb_access_logs_bucket_prefix" {
+  type        = string
+  description = "The public load balancer access logs bucket prefix. Logs are stored in the root if not configured."
+  default     = null
+}
+
+variable "public_lb_access_logs_expiration" {
+  type        = number
+  description = "Specifies the number of days for which public load balancer access logs are kept (indefinitely if not specified)."
+  default     = null
+}
+
+variable "public_lb_access_logs_force_destroy" {
+  type        = bool
+  description = "A boolean that indicates all objects should be deleted from the public load balancer access logs bucket so that the bucket can be destroyed without error. These objects are not recoverable."
+  default     = false
+}
+
+variable "public_lb_access_logs_bucket_encryption" {
+  type        = bool
+  description = "Should the public load balancer access logs bucket be encrypted using SSE-S3."
+  default     = true
+}
+
+/* Private load balancer access logs params */
+variable "private_lb_access_logs_enabled" {
+  type        = bool
+  description = "Wether to enable the private load balancer access logs or not."
+  default     = false
+}
+
+variable "private_lb_access_logs_bucket_name" {
+  type        = string
+  description = "Override the private load balancer access logs bucket name."
+  default     = ""
+}
+
+variable "private_lb_access_logs_bucket_prefix" {
+  type        = string
+  description = "The private load balancer access logs bucket prefix. Logs are stored in the root if not configured."
+  default     = null
+}
+
+variable "private_lb_access_logs_expiration" {
+  type        = number
+  description = "Specifies the number of days for which private load balancer access logs are kept (indefinitely if not specified)."
+  default     = null
+}
+
+variable "private_lb_access_logs_force_destroy" {
+  type        = bool
+  description = "A boolean that indicates all objects should be deleted from the private load balancer access logs bucket so that the bucket can be destroyed without error. These objects are not recoverable."
+  default     = false
+}
+
+variable "private_lb_access_logs_bucket_encryption" {
+  type        = bool
+  description = "Should the private load balancer access logs bucket be encrypted using SSE-S3."
+  default     = true
+}
