@@ -134,6 +134,9 @@ resource "aws_lb" "quortex_public" {
     var.public_tags,
     var.tags
   )
+  depends_on = [
+    aws_s3_bucket_policy.public_lb_access_logs
+  ]
 }
 
 # Target group of the ALB (type IP)
