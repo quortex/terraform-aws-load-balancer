@@ -182,6 +182,12 @@ variable "load_balancer_private_whitelisted_ips" {
   default     = []
 }
 
+variable "load_balancer_private_whitelisted_prefix_lists" {
+  type        = list(string)
+  description = "A list of prefix list names to whitelist for restricted ip access to the private load balancer."
+  default     = []
+}
+
 variable "load_balancer_public_restrict_ip_access" {
   type        = bool
   description = "Whether the public load balancer access should be restricted. It is useful to restrict access if a CDN is setup in front."
