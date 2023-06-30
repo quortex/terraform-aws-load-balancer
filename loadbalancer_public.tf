@@ -76,7 +76,7 @@ resource "aws_vpc_security_group_ingress_rule" "lb_public_https" {
 resource "aws_vpc_security_group_ingress_rule" "lb_public_http_prefix_list" {
   count = var.load_balancer_public_expose_http && var.load_balancer_public_restrict_ip_access ? length(var.load_balancer_public_whitelisted_prefix_lists) : 0
 
-  description       = "Allow simple HTTP from cloudfront prefix list"
+  description       = "Allow simple HTTP from given prefix list"
   from_port         = 80
   to_port           = 80
   ip_protocol       = "tcp"
@@ -89,7 +89,7 @@ resource "aws_vpc_security_group_ingress_rule" "lb_public_http_prefix_list" {
 resource "aws_vpc_security_group_ingress_rule" "lb_public_https_prefix_list" {
   count = var.load_balancer_public_expose_https && var.load_balancer_public_restrict_ip_access ? length(var.load_balancer_public_whitelisted_prefix_lists) : 0
 
-  description       = "Allow TLS HTTP from from cloudfront prefix list"
+  description       = "Allow TLS HTTP from from given prefix list"
   from_port         = 443
   to_port           = 443
   ip_protocol       = "tcp"

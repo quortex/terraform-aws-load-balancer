@@ -71,6 +71,32 @@ resource "aws_security_group_rule" "lb_private_https" {
   source_security_group_id = null
 }
 
+resource "aws_vpc_security_group_ingress_rule" "lb_private_http_prefix_list" {
+  count = var.load_balancer_private_expose_http && length(var.load_balancer_private_app_backend_ports) > 0 ? length(var.load_balancer_private_whitelisted_prefix_lists) : 0
+
+  description       = "Allow simple HTTP from given prefix list"
+  from_port         = 80
+  to_port           = 80
+  ip_protocol       = "tcp"
+  prefix_list_id    = var.load_balancer_private_whitelisted_prefix_lists[count.index]
+  security_group_id = aws_security_group.quortex_private[0].id
+
+  tags = var.tags
+}
+
+resource "aws_vpc_security_group_ingress_rule" "lb_private_https_prefix_list" {
+  count = var.load_balancer_private_expose_https && length(var.load_balancer_private_app_backend_ports) > 0 ? length(var.load_balancer_private_whitelisted_prefix_lists) : 0
+
+  description       = "Allow TLS HTTP from from given prefix list"
+  from_port         = 443
+  to_port           = 443
+  ip_protocol       = "tcp"
+  prefix_list_id    = var.load_balancer_private_whitelisted_prefix_lists[count.index]
+  security_group_id = aws_security_group.quortex_private[0].id
+
+  tags = var.tags
+}
+
 resource "aws_security_group_rule" "lb_private_egress" {
   count = length(var.load_balancer_private_app_backend_ports) > 0 ? 1 : 0
 
