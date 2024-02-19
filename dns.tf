@@ -30,15 +30,15 @@ locals {
 
 # DNS record aliases that target the load balancer
 resource "aws_route53_record" "quortex_public" {
-  for_each = var.dns_records_public
+  for_each = length(var.load_balancer_public_app_backend_ports) > 0 ? var.dns_records_public : {}
 
   zone_id = data.aws_route53_zone.selected[0].zone_id
   name    = each.value
   type    = "A"
 
   alias {
-    name                   = aws_lb.quortex_public.dns_name
-    zone_id                = aws_lb.quortex_public.zone_id
+    name                   = aws_lb.quortex_public[0].dns_name
+    zone_id                = aws_lb.quortex_public[0].zone_id
     evaluate_target_health = false
   }
 }
