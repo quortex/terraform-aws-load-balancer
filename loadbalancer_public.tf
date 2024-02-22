@@ -35,6 +35,7 @@ locals {
 
 # Security group
 resource "aws_security_group" "quortex_public" {
+  count = length(var.load_balancer_public_app_backend_ports) > 0 ? 1 : 0
   name        = local.public_lb_security_group_name
   description = "Security group for the public ALB"
   vpc_id      = var.vpc_id
@@ -48,62 +49,63 @@ resource "aws_security_group" "quortex_public" {
 
 # Security group rules
 resource "aws_vpc_security_group_ingress_rule" "lb_public_http" {
-  for_each = var.load_balancer_public_expose_http ? local.public_lb_allowed_ip_ranges : []
+  for_each = length(var.load_balancer_public_app_backend_ports) > 0 && var.load_balancer_public_expose_http ? local.public_lb_allowed_ip_ranges : []
 
   description       = "Allow simple HTTP from whitelisted ip ranges only"
   from_port         = 80
   to_port           = 80
   ip_protocol       = "tcp"
   cidr_ipv4         = each.value
-  security_group_id = aws_security_group.quortex_public.id
+  security_group_id = aws_security_group.quortex_public[0].id
 
   tags = var.tags
 }
 
 resource "aws_vpc_security_group_ingress_rule" "lb_public_https" {
-  for_each = var.load_balancer_public_expose_https ? local.public_lb_allowed_ip_ranges : []
+  for_each = length(var.load_balancer_public_app_backend_ports) > 0 && var.load_balancer_public_expose_https ? local.public_lb_allowed_ip_ranges : []
 
   description       = "Allow TLS HTTP from whitelisted ip ranges only"
   from_port         = 443
   to_port           = 443
   ip_protocol       = "tcp"
   cidr_ipv4         = each.value
-  security_group_id = aws_security_group.quortex_public.id
+  security_group_id = aws_security_group.quortex_public[0].id
 
   tags = var.tags
 }
 
 resource "aws_vpc_security_group_ingress_rule" "lb_public_http_prefix_list" {
-  count = var.load_balancer_public_expose_http && var.load_balancer_public_restrict_ip_access ? length(var.load_balancer_public_whitelisted_prefix_lists) : 0
+  count = length(var.load_balancer_public_app_backend_ports) > 0 && var.load_balancer_public_expose_http && var.load_balancer_public_restrict_ip_access ? length(var.load_balancer_public_whitelisted_prefix_lists) : 0
 
   description       = "Allow simple HTTP from given prefix list"
   from_port         = 80
   to_port           = 80
   ip_protocol       = "tcp"
   prefix_list_id    = var.load_balancer_public_whitelisted_prefix_lists[count.index]
-  security_group_id = aws_security_group.quortex_public.id
+  security_group_id = aws_security_group.quortex_public[0].id
 
   tags = var.tags
 }
 
 resource "aws_vpc_security_group_ingress_rule" "lb_public_https_prefix_list" {
-  count = var.load_balancer_public_expose_https && var.load_balancer_public_restrict_ip_access ? length(var.load_balancer_public_whitelisted_prefix_lists) : 0
+  count = length(var.load_balancer_public_app_backend_ports) > 0 && var.load_balancer_public_expose_https && var.load_balancer_public_restrict_ip_access ? length(var.load_balancer_public_whitelisted_prefix_lists) : 0
 
   description       = "Allow TLS HTTP from from given prefix list"
   from_port         = 443
   to_port           = 443
   ip_protocol       = "tcp"
   prefix_list_id    = var.load_balancer_public_whitelisted_prefix_lists[count.index]
-  security_group_id = aws_security_group.quortex_public.id
+  security_group_id = aws_security_group.quortex_public[0].id
 
   tags = var.tags
 }
 
 resource "aws_vpc_security_group_egress_rule" "lb_public_egress" {
+  count = length(var.load_balancer_public_app_backend_ports) > 0 ? 1 : 0
   description       = "Allow all traffic out"
   ip_protocol       = -1
   cidr_ipv4         = "0.0.0.0/0"
-  security_group_id = aws_security_group.quortex_public.id
+  security_group_id = aws_security_group.quortex_public[0].id
 
   tags = var.tags
 }
@@ -111,17 +113,18 @@ resource "aws_vpc_security_group_egress_rule" "lb_public_egress" {
 
 # Load balancer (ALB)
 resource "aws_lb" "quortex_public" {
+  count = length(var.load_balancer_public_app_backend_ports) > 0 ? 1 : 0
   name = local.public_lb_name
 
   internal           = false
   load_balancer_type = "application"
-  security_groups    = [aws_security_group.quortex_public.id]
+  security_groups    = [aws_security_group.quortex_public[0].id]
   subnets            = var.subnet_ids
 
   # Access logs storage in s3
   access_logs {
     enabled = var.public_lb_access_logs_enabled
-    bucket  = aws_s3_bucket.public_lb_access_logs.bucket
+    bucket  = aws_s3_bucket.public_lb_access_logs[0].bucket
     prefix  = var.public_lb_access_logs_bucket_prefix
   }
 
@@ -197,7 +200,7 @@ resource "aws_lb_listener" "quortex_public_tls" {
   # No listener will be created (yet) if the target port is not defined
   count = var.load_balancer_public_expose_https && length(var.load_balancer_public_app_backend_ports) > 0 ? 1 : 0
 
-  load_balancer_arn = aws_lb.quortex_public.arn
+  load_balancer_arn = aws_lb.quortex_public[0].arn
   port              = "443"
   protocol          = "HTTPS"
   ssl_policy        = var.public_lb_ssl_policy
@@ -243,7 +246,7 @@ resource "aws_lb_listener_certificate" "quortex_public" {
 
 resource "aws_lb_listener_rule" "quortex_public_tls_token_rule" {
   # This rule forwards traffic if the header token match the condition
-  count = var.load_balancer_public_expose_https ? 1 : 0
+  count = length(var.load_balancer_public_app_backend_ports) > 0 && var.load_balancer_public_expose_https ? 1 : 0
 
   listener_arn = aws_lb_listener.quortex_public_tls[0].arn
   priority     = 1000
@@ -305,7 +308,7 @@ resource "aws_lb_listener" "quortex_public_http" {
   # No listener will be created (yet) if the no port is defined
   count = var.load_balancer_public_expose_http && length(var.load_balancer_public_app_backend_ports) > 0 ? 1 : 0
 
-  load_balancer_arn = aws_lb.quortex_public.arn
+  load_balancer_arn = aws_lb.quortex_public[0].arn
   port              = "80"
   protocol          = "HTTP"
 
@@ -353,7 +356,7 @@ resource "aws_lb_listener" "quortex_public_http" {
 
 resource "aws_lb_listener_rule" "quortex_public_http_token_rule" {
   # This rule forwards traffic if the header token match the condition
-  count = var.load_balancer_public_expose_http ? 1 : 0
+  count = length(var.load_balancer_public_app_backend_ports) > 0 && var.load_balancer_public_expose_http ? 1 : 0
 
   listener_arn = aws_lb_listener.quortex_public_http[0].arn
   priority     = 1000
@@ -410,6 +413,7 @@ resource "aws_lb_listener_rule" "quortex_public_http_whitelist_rule" {
 
 # Public ELB access logs bucket configuration
 resource "aws_s3_bucket" "public_lb_access_logs" {
+  count = length(var.load_balancer_public_app_backend_ports) > 0 ? 1 : 0
   bucket        = var.public_lb_access_logs_bucket_name != "" ? var.public_lb_access_logs_bucket_name : "${var.resource_name}-public-lb-access-logs"
   force_destroy = var.public_lb_access_logs_force_destroy
 
@@ -417,9 +421,9 @@ resource "aws_s3_bucket" "public_lb_access_logs" {
 }
 
 resource "aws_s3_bucket_lifecycle_configuration" "public_lb_access_logs" {
-  count = var.public_lb_access_logs_expiration != null ? 1 : 0
+  count = length(var.load_balancer_public_app_backend_ports) > 0 && var.public_lb_access_logs_expiration != null ? 1 : 0
 
-  bucket = aws_s3_bucket.public_lb_access_logs.id
+  bucket = aws_s3_bucket.public_lb_access_logs[0].id
   rule {
     id     = "expiration"
     status = "Enabled"
@@ -430,7 +434,8 @@ resource "aws_s3_bucket_lifecycle_configuration" "public_lb_access_logs" {
 }
 
 resource "aws_s3_bucket_public_access_block" "public_lb_access_logs" {
-  bucket = aws_s3_bucket.public_lb_access_logs.id
+  count = length(var.load_balancer_public_app_backend_ports) > 0 ? 1 : 0
+  bucket = aws_s3_bucket.public_lb_access_logs[0].id
 
   block_public_acls       = true
   block_public_policy     = true
@@ -440,8 +445,8 @@ resource "aws_s3_bucket_public_access_block" "public_lb_access_logs" {
 
 # Set minimal encryption on buckets
 resource "aws_s3_bucket_server_side_encryption_configuration" "public_lb_access_logs" {
-  count  = var.public_lb_access_logs_bucket_encryption ? 1 : 0
-  bucket = aws_s3_bucket.public_lb_access_logs.id
+  count  = length(var.load_balancer_public_app_backend_ports) > 0 && var.public_lb_access_logs_bucket_encryption ? 1 : 0
+  bucket = aws_s3_bucket.public_lb_access_logs[0].id
 
   rule {
     apply_server_side_encryption_by_default {
@@ -451,7 +456,8 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "public_lb_access_
 }
 
 resource "aws_s3_bucket_policy" "public_lb_access_logs" {
-  bucket = aws_s3_bucket.public_lb_access_logs.id
+  count = length(var.load_balancer_public_app_backend_ports) > 0 ? 1 : 0
+  bucket = aws_s3_bucket.public_lb_access_logs[0].id
   policy = jsonencode({
     Version = "2012-10-17",
     Statement = [
@@ -461,7 +467,7 @@ resource "aws_s3_bucket_policy" "public_lb_access_logs" {
           AWS = "arn:aws:iam::${data.aws_elb_service_account.current.id}:root"
         },
         Action   = "s3:PutObject",
-        Resource = "arn:aws:s3:::${aws_s3_bucket.public_lb_access_logs.bucket}/*"
+        Resource = "arn:aws:s3:::${aws_s3_bucket.public_lb_access_logs[0].bucket}/*"
       },
       {
         Effect = "Allow",
@@ -469,7 +475,7 @@ resource "aws_s3_bucket_policy" "public_lb_access_logs" {
           Service = "logdelivery.elasticloadbalancing.amazonaws.com"
         },
         Action   = "s3:PutObject",
-        Resource = "arn:aws:s3:::${aws_s3_bucket.public_lb_access_logs.bucket}/*",
+        Resource = "arn:aws:s3:::${aws_s3_bucket.public_lb_access_logs[0].bucket}/*",
       }
     ]
   })

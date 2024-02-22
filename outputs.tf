@@ -60,7 +60,7 @@ output "dns_records_private" {
 }
 
 output "lb_public_sg_id" {
-  value       = aws_security_group.quortex_public.id
+  value       = try(aws_security_group.quortex_public[0].id, null)
   description = "ID of the Security Group attached to the public load balancer."
 }
 
