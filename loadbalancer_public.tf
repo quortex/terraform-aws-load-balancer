@@ -339,7 +339,7 @@ resource "aws_lb_listener" "quortex_public_http" {
   }
 
   dynamic "default_action" {
-    for_each = !var.load_balancer_public_redirect_http_to_https && var.load_balancer_public_restrict_token_access ? [] : [1]
+    for_each = !var.load_balancer_public_redirect_http_to_https && !var.load_balancer_public_restrict_token_access ? [1] : []
 
     content {
       type             = "forward"
