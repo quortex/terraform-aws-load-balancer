@@ -40,7 +40,7 @@ output "public_lb_dns_name" {
 }
 
 output "private_lb_target_group_arns" {
-  value       = aws_lb_target_group.quortex_public[*].arn
+  value       = aws_lb_target_group.quortex_private[*].arn
   description = "The ARN of the target groups that instances should be attached to. Once the load balancer and its target groups are created, instances that can listen must be attached to these groups."
 }
 
