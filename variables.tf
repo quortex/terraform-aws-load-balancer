@@ -142,6 +142,18 @@ variable "load_balancer_public_additional_certs_arns" {
   description = "A list of ARNs for public loadbalancer HTTPS listener additional certificates."
 }
 
+variable "load_balancer_public_additional_certs_hostnames" {
+  type        = set(string)
+  default     = []
+  description = "A list of hostnames for which certificates should be created and added to the public loadbalancer HTTPS listener."
+}
+
+variable "load_balancer_public_additional_dns_records" {
+  type        = set(string)
+  default     = []
+  description = "A list of hostnames for wich DNS records pointing to the public loadbalancer should be created."
+}
+
 variable "load_balancer_private_expose_http" {
   type        = bool
   default     = true
@@ -164,6 +176,18 @@ variable "load_balancer_private_additional_certs_arns" {
   type        = set(string)
   default     = []
   description = "A list of ARNs for private loadbalancer HTTPS listener additional certificates."
+}
+
+variable "load_balancer_private_additional_certs_hostnames" {
+  type        = set(string)
+  default     = []
+  description = "A list of hostnames for which certificates should be created and added to the private loadbalancer HTTPS listener."
+}
+
+variable "load_balancer_private_additional_dns_records" {
+  type        = set(string)
+  default     = []
+  description = "A list of hostnames for wich DNS records pointing to the private loadbalancer should be created."
 }
 
 variable "load_balancer_public_app_backend_ports" {

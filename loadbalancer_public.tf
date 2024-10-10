@@ -236,12 +236,21 @@ resource "aws_lb_listener" "quortex_public_tls" {
 }
 
 # Provides Load Balancer Listener Certificate resources.
-# These resources are for additional certificates and does not replace the default certificate on the listener.
+# These resources are for additional certificates whose ARNs were passed in the load_balancer_public_additional_certs_arns variable and does not replace the default certificate on the listener.
 resource "aws_lb_listener_certificate" "quortex_public" {
   for_each = var.load_balancer_public_expose_https && length(var.load_balancer_public_app_backend_ports) > 0 ? var.load_balancer_public_additional_certs_arns : []
 
   listener_arn    = aws_lb_listener.quortex_public_tls[0].arn
   certificate_arn = each.value
+}
+
+# Provides Load Balancer Listener Certificate resources.
+# These resources are for an additional certificate created by this module, whose hotnames were passed in the load_balancer_public_additional_certs_hostnames variable and does not replace the default certificate on the listener.
+resource "aws_lb_listener_certificate" "quortex_public_additional" {
+  for_each = var.load_balancer_public_expose_https && length(var.load_balancer_public_app_backend_ports) > 0 ? {for index, cert in aws_acm_certificate.additional_cert_public: index => cert} : {}
+
+  listener_arn    = aws_lb_listener.quortex_public_tls[0].arn
+  certificate_arn = each.value.arn
 }
 
 resource "aws_lb_listener_rule" "quortex_public_tls_token_rule" {

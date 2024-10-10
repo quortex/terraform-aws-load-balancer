@@ -43,9 +43,39 @@ resource "aws_route53_record" "quortex_public" {
   }
 }
 
+# Additional DNS record aliases that target the public load balancer
+resource "aws_route53_record" "quortex_public_additional" {
+  for_each = length(var.load_balancer_public_app_backend_ports) > 0 ? var.load_balancer_public_additional_dns_records : []
+
+  zone_id = data.aws_route53_zone.selected[0].zone_id
+  name    = each.value
+  type    = "A"
+
+  alias {
+    name                   = aws_lb.quortex_public[0].dns_name
+    zone_id                = aws_lb.quortex_public[0].zone_id
+    evaluate_target_health = false
+  }
+}
+
 # DNS record aliases that target the load balancer
 resource "aws_route53_record" "quortex_private" {
   for_each = var.dns_records_private
+
+  zone_id = data.aws_route53_zone.selected[0].zone_id
+  name    = each.value
+  type    = "A"
+
+  alias {
+    name                   = aws_lb.quortex_private[0].dns_name
+    zone_id                = aws_lb.quortex_private[0].zone_id
+    evaluate_target_health = false
+  }
+}
+
+# Additional DNS record aliases that target the private load balancer
+resource "aws_route53_record" "quortex_private_additional" {
+  for_each = length(var.load_balancer_private_app_backend_ports) > 0 ? var.load_balancer_private_additional_dns_records : []
 
   zone_id = data.aws_route53_zone.selected[0].zone_id
   name    = each.value
