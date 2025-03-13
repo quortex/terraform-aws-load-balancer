@@ -83,3 +83,13 @@ output "ssl_certificate_arn" {
   value       = try(aws_acm_certificate.cert.0.arn, "")
   description = "ARN of the created SSL certificate."
 }
+
+output "additional_private_cert_arns" {
+  value       = try([for cert in aws_acm_certificate.additional_cert_private : cert.arn])
+  description = "Arns of the additional private certificates"
+}
+
+output "additional_public_cert_arns" {
+  value       = try([for cert in aws_acm_certificate.additional_cert_public : cert.arn])
+  description = "Arns of the additional public certificates"
+}
